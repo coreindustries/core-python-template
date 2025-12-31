@@ -1,3 +1,9 @@
+---
+prd_version: "1.0"
+status: "Active"
+last_updated: "2025-01-XX"
+---
+
 # 02 – Tech Stack
 
 ## 1. Backend
@@ -39,11 +45,30 @@
   - Use Prisma Client Python (where viable), or
   - Use SQLAlchemy/SQLModel models that mirror the Prisma schema.
 
-### 1.4 Environment variables
+### 1.4 Environment Variables
 
-- **dotenv** (python) use this library for accessing env vars in all python modules
-  - ignore .envionrment in all github, cursor, and claude calls, since it includes sensitive data
-  - add other protections to this file as required by best practices and our security standards
+**REQUIRED:** All services MUST use the `dotenv` library for environment variable management.
+
+- **Python:** Use `python-dotenv` library
+
+  - **REQUIRED:** Use `dotenv` for accessing environment variables in all Python modules
+  - Load environment variables at application startup using `load_dotenv()`
+  - Ignore `.environment` in all GitHub, Cursor, and Claude calls, since it includes sensitive data
+  - Add other protections to this file as required by best practices and our security standards
+
+- **Node.js/TypeScript:** Use `dotenv` package
+  - **REQUIRED:** Use `dotenv` for accessing environment variables in all Node.js/TypeScript modules
+  - Load environment variables at application startup using `dotenv.config()`
+  - Next.js has built-in support for `.env` files, but `dotenv` should still be used for explicit configuration
+  - Ignore `.environment` and `.env.local` in all GitHub, Cursor, and Claude calls
+
+**Best Practices:**
+
+- Never hardcode environment variables in source code
+- Use `.env.example` files to document required environment variables (without values)
+- Keep `.environment` and `.env.local` files in `.gitignore`
+- Load environment variables once at application startup, not per-module
+- Validate required environment variables at startup and fail fast if missing
 
 ## 2. Frontend
 
@@ -65,9 +90,9 @@
     - Forms (scan and project configuration).
     - Modals, sheets, and toasts.
 
-Defined in detail in `12-Observability-and-Metrics.md` (TODO: Create this PRD).
+Defined in detail in `12_Observability_and_Metrics.md` (TODO: Create this PRD).
 
-## 4. Containerization
+## 3. Containerization
 
 - Each component runs as a separate Docker image:
 

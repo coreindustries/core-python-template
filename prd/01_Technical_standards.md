@@ -1,3 +1,9 @@
+---
+prd_version: "1.0"
+status: "Active"
+last_updated: "2025-01-XX"
+---
+
 # 01 – Technical Standards and Tech Stack
 
 ## 1. Purpose
@@ -555,6 +561,63 @@ async function fetchUser(userId: string): Promise<ApiResponse<User>> {
 }
 ```
 
+### 6.3 Environment Variable Management
+
+**REQUIRED:** All services MUST use the `dotenv` library for environment variable management.
+
+#### Python
+
+- **REQUIRED:** Use `python-dotenv` library for all environment variable access
+- Load environment variables at application startup using `load_dotenv()`
+- Never access `os.environ` directly without loading dotenv first
+- Validate required environment variables at startup
+
+**Example:**
+
+```python
+from dotenv import load_dotenv
+import os
+
+# Load environment variables at startup
+load_dotenv()
+
+# Access environment variables
+database_url = os.getenv("DATABASE_URL")
+if not database_url:
+    raise ValueError("DATABASE_URL environment variable is required")
+```
+
+#### Node.js/TypeScript
+
+- **REQUIRED:** Use `dotenv` package for all environment variable access
+- Load environment variables at application startup using `dotenv.config()`
+- Next.js has built-in `.env` file support, but `dotenv` should be used for explicit configuration in non-Next.js services
+- Validate required environment variables at startup
+
+**Example:**
+
+```typescript
+import dotenv from "dotenv";
+
+// Load environment variables at startup
+dotenv.config();
+
+// Access environment variables
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL environment variable is required");
+}
+```
+
+#### Best Practices
+
+- **Never hardcode** environment variables in source code
+- **Use `.env.example`** files to document required environment variables (without values)
+- **Keep sensitive files in `.gitignore`**: `.environment`, `.env.local`, `.env`
+- **Load once at startup**: Load environment variables once at application startup, not per-module
+- **Fail fast**: Validate required environment variables at startup and fail immediately if missing
+- **Type safety**: Use TypeScript types or Python dataclasses for environment variable configuration
+
 ## 7. Code Review Process
 
 ### 7.1 Review Checklist
@@ -682,4 +745,4 @@ Exceptions to these standards may be granted only with:
 
 - `02_Tech_stack.md` - Detailed tech stack information
 - `03_Security.md` - Security-specific requirements
-- `12-Observability-and-Metrics.md` - Monitoring and observability standards (TODO: Create this PRD)
+- `12_Observability_and_Metrics.md` - Monitoring and observability standards (TODO: Create this PRD)

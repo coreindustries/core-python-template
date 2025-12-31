@@ -1,3 +1,9 @@
+---
+prd_version: "1.0"
+status: "Active"
+last_updated: "2025-01-XX"
+---
+
 # 03 – Security Scanning and Code Review
 
 ## 1. Purpose

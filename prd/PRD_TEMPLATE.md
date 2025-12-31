@@ -1,3 +1,10 @@
+---
+prd_version: "1.0"
+status: "Draft" # Draft | Active | Deprecated
+last_updated: "YYYY-MM-DD"
+owner: "@github-handle"
+---
+
 # [PRD Number] – [Feature Name]
 
 ## 1. Purpose
