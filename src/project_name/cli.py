@@ -11,6 +11,7 @@ from rich.table import Table
 from project_name import __version__
 from project_name.config import settings
 
+
 # Create CLI app
 app = typer.Typer(
     name="project-name",  # TODO: Update project name
@@ -54,7 +55,10 @@ def info() -> None:
     table.add_row("API Host", settings.api_host)
     table.add_row("API Port", str(settings.api_port))
     table.add_row("Database URL", _mask_url(settings.database_url))
-    table.add_row("Redis URL", _mask_url(settings.redis_url) if settings.redis_url else "Not configured")
+    table.add_row(
+        "Redis URL",
+        _mask_url(settings.redis_url) if settings.redis_url else "Not configured",
+    )
 
     console.print(table)
 
@@ -95,11 +99,11 @@ def serve(
 @app.command()
 def db_migrate() -> None:
     """Run database migrations."""
-    import subprocess
+    import subprocess  # nosec B404  # CLI tool, safe subprocess usage
 
     rprint("[bold blue]Running database migrations...[/bold blue]")
-    result = subprocess.run(
-        ["uv", "run", "prisma", "migrate", "deploy"],
+    result = subprocess.run(  # noqa: S603  # nosec B603, B607  # shell=False is safe, command is hardcoded
+        ["uv", "run", "prisma", "migrate", "deploy"],  # noqa: S607
         capture_output=True,
         text=True,
         check=False,
@@ -115,11 +119,11 @@ def db_migrate() -> None:
 @app.command()
 def db_generate() -> None:
     """Generate Prisma client."""
-    import subprocess
+    import subprocess  # nosec B404  # CLI tool, safe subprocess usage
 
     rprint("[bold blue]Generating Prisma client...[/bold blue]")
-    result = subprocess.run(
-        ["uv", "run", "prisma", "generate"],
+    result = subprocess.run(  # noqa: S603  # nosec B603, B607  # shell=False is safe, command is hardcoded
+        ["uv", "run", "prisma", "generate"],  # noqa: S607
         capture_output=True,
         text=True,
         check=False,

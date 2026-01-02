@@ -9,6 +9,7 @@ from typing import Generic, TypeVar
 
 from pydantic import BaseModel
 
+
 # Type variables for generic service
 T = TypeVar("T")  # Entity type
 CreateT = TypeVar("CreateT", bound=BaseModel)  # Create DTO type
@@ -72,40 +73,11 @@ class BaseService(ABC, Generic[T, CreateT, UpdateT]):
 
 
 # =============================================================================
-# Example Service - uncomment and modify as needed
+# Example Service
 # =============================================================================
-
-# from project_name.models import User, UserCreate, UserUpdate
-# from project_name.db import get_db
-
-# class UserService(BaseService[User, UserCreate, UserUpdate]):
-#     """Service for user operations."""
-
-#     async def get_by_id(self, entity_id: str) -> User | None:
-#         async with get_db() as db:
-#             user = await db.user.find_unique(where={"id": entity_id})
-#             return User.model_validate(user) if user else None
-
-#     async def create(self, data: UserCreate) -> User:
-#         async with get_db() as db:
-#             user = await db.user.create(data=data.model_dump())
-#             return User.model_validate(user)
-
-#     async def update(self, entity_id: str, data: UserUpdate) -> User | None:
-#         async with get_db() as db:
-#             update_data = data.model_dump(exclude_unset=True)
-#             if not update_data:
-#                 return await self.get_by_id(entity_id)
-#             user = await db.user.update(
-#                 where={"id": entity_id},
-#                 data=update_data,
-#             )
-#             return User.model_validate(user) if user else None
-
-#     async def delete(self, entity_id: str) -> bool:
-#         async with get_db() as db:
-#             try:
-#                 await db.user.delete(where={"id": entity_id})
-#                 return True
-#             except Exception:
-#                 return False
+# To create a service, inherit from BaseService and implement CRUD operations.
+# Example pattern:
+# - Import models: from project_name.models import User, UserCreate, UserUpdate
+# - Import db: from project_name.db import get_db
+# - Create service class inheriting from BaseService[User, UserCreate, UserUpdate]
+# - Implement async methods: get_by_id, create, update, delete

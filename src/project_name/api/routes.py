@@ -7,6 +7,7 @@ from fastapi import APIRouter
 
 from project_name import __version__
 
+
 router = APIRouter()
 
 
@@ -31,28 +32,7 @@ async def root() -> dict[str, str]:
 
 
 # =============================================================================
-# Example CRUD routes - uncomment and modify as needed
+# Example CRUD routes
 # =============================================================================
-
-# from fastapi import HTTPException, status
-# from project_name.models.user import User, UserCreate
-# from project_name.services.user import UserService
-
-# user_router = APIRouter(prefix="/users", tags=["users"])
-
-# @user_router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
-# async def create_user(user_data: UserCreate) -> User:
-#     """Create a new user."""
-#     service = UserService()
-#     return await service.create(user_data)
-
-# @user_router.get("/{user_id}", response_model=User)
-# async def get_user(user_id: str) -> User:
-#     """Get a user by ID."""
-#     service = UserService()
-#     user = await service.get_by_id(user_id)
-#     if not user:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     return user
-
-# router.include_router(user_router)
+# To add CRUD routes, create new routers in separate files and include them.
+# Use router.include_router() with prefix and tags parameters.

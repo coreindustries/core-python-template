@@ -6,7 +6,8 @@ This module provides database connection handling using Prisma.
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from prisma import Prisma
+from prisma import Prisma  # type: ignore[attr-defined]
+
 
 # Global database client instance
 _db: Prisma | None = None

@@ -30,29 +30,9 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 
 
 # =============================================================================
-# Database Fixtures - uncomment when needed
+# Database Fixtures
 # =============================================================================
-
-# from project_name.db import get_db_client, close_db_client
-
-# @pytest.fixture(scope="session")
-# def event_loop():
-#     """Create event loop for session-scoped fixtures."""
-#     import asyncio
-#     loop = asyncio.get_event_loop_policy().new_event_loop()
-#     yield loop
-#     loop.close()
-
-# @pytest.fixture(scope="session")
-# async def db():
-#     """Provide database client for integration tests."""
-#     client = await get_db_client()
-#     yield client
-#     await close_db_client()
-
-# @pytest.fixture(autouse=True)
-# async def clean_db(db):
-#     """Clean database before each test."""
-#     # Add cleanup logic here
-#     yield
-#     # Add cleanup logic here
+# To add database fixtures for integration tests:
+# 1. Import: from project_name.db import get_db_client, close_db_client
+# 2. Create session-scoped fixtures for database connections
+# 3. Use autouse fixtures for test cleanup

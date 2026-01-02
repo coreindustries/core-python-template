@@ -33,9 +33,11 @@ class Settings(BaseSettings):
     )
 
     # Database
-    database_url: str = "postgresql://postgres:postgres@localhost:5432/app"
+    database_url: str = (
+        "postgresql://postgres:postgres@localhost:5432/app"  # pragma: allowlist secret
+    )
 
-    # Redis (optional)
+    # Redis optional
     redis_url: str | None = None
 
     # Application
@@ -44,7 +46,7 @@ class Settings(BaseSettings):
     environment: Literal["development", "staging", "production"] = "development"
 
     # API
-    api_host: str = "0.0.0.0"
+    api_host: str = "0.0.0.0"  # noqa: S104  # nosec B104  # Allow binding to all interfaces for server
     api_port: int = 8000
     cors_origins: list[str] = ["http://localhost:3000"]
 
