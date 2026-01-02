@@ -1,10 +1,20 @@
 # Cursor Indexing Ignore File
 # Files listed here are excluded from Cursor's codebase indexing
 # This improves performance and excludes irrelevant files from search
+#
+# Strategy:
+# - Exclude generated/temporary files (not useful for AI context)
+# - Exclude dependencies (too large, use library docs instead)
+# - Exclude sensitive data (security requirement)
+# - Include source code, tests, PRDs, and configuration files
+#
+# For more details, see: docs/CURSOR_CONTEXT_STRATEGY.md
 
 # =============================================================================
 # Environment & Secrets (CRITICAL - exclude from indexing)
 # =============================================================================
+# Reason: Contains sensitive credentials and API keys
+# Security: Never index secrets to prevent accidental exposure to AI models
 .env
 .env.*
 .env.local
@@ -23,6 +33,8 @@ service-account*.json
 # =============================================================================
 # Dependencies & Virtual Environments
 # =============================================================================
+# Reason: Too large, change frequently, and not useful for AI context
+# Alternative: Use MCP tools (Context7) to look up library documentation
 __pycache__/
 *.pyc
 *.pyo
@@ -36,6 +48,8 @@ node_modules/
 # =============================================================================
 # Build Artifacts
 # =============================================================================
+# Reason: Generated files, not source code
+# These are outputs, not inputs for understanding the codebase
 dist/
 build/
 *.egg-info/
@@ -46,6 +60,9 @@ wheels/
 # =============================================================================
 # Generated Files
 # =============================================================================
+# Reason: Auto-generated code that changes frequently
+# Prisma client is generated from schema.prisma (which IS indexed)
+# Coverage reports are generated from tests (which ARE indexed)
 prisma/.client/
 htmlcov/
 coverage.xml
@@ -55,6 +72,8 @@ coverage.xml
 # =============================================================================
 # Cache & Temp
 # =============================================================================
+# Reason: Temporary files that don't represent actual code
+# These are performance caches and editor temp files
 .cache/
 .pytest_cache/
 .mypy_cache/
@@ -66,6 +85,7 @@ coverage.xml
 # =============================================================================
 # IDE & OS
 # =============================================================================
+# Reason: Editor and OS-specific files, not part of the codebase
 .idea/
 .vscode/
 .DS_Store
@@ -74,11 +94,15 @@ Thumbs.db
 # =============================================================================
 # Git
 # =============================================================================
+# Reason: Git history is large and not needed for code understanding
+# Use git commands or GitHub MCP for version control operations
 .git/
 
 # =============================================================================
 # Large/Binary Files
 # =============================================================================
+# Reason: Binary files are not useful for AI code analysis
+# They consume indexing resources without providing code context
 *.zip
 *.tar
 *.tar.gz
@@ -90,3 +114,14 @@ Thumbs.db
 *.docx
 *.xls
 *.xlsx
+
+# =============================================================================
+# Test Fixtures & Large Test Data
+# =============================================================================
+# Reason: Large test data files don't help AI understand code patterns
+# Test code itself IS indexed (tests/unit/, tests/integration/)
+# Only exclude large binary/fixture data files
+tests/fixtures/
+tests/data/
+*.testdata
+*.fixture

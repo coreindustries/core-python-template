@@ -1,0 +1,112 @@
+{
+  "$schema": "https://claude.ai/claude-code/settings-schema.json",
+  "_comment": "This is a template for project-specific Cursor settings overrides.",
+  "_instructions": "Copy this file to .claude/settings.local.json and customize for your project. This file is gitignored and won't be committed.",
+
+  "hooks": {
+    "_comment": "Add project-specific hooks here. These will be merged with .claude/settings.json",
+    "preToolCall": [
+      {
+        "name": "project-specific-guard",
+        "description": "Example: Block modifications to critical project files",
+        "matcher": {
+          "toolNames": ["Edit", "Write"],
+          "filePatterns": ["**/critical_config.py"]
+        },
+        "command": "echo '⚠️ WARNING: Modifying critical configuration. Are you sure?' && exit 1"
+      }
+    ],
+    "postToolCall": [
+      {
+        "name": "project-specific-reminder",
+        "description": "Example: Remind to update project-specific documentation",
+        "matcher": {
+          "toolNames": ["Edit", "Write"],
+          "filePatterns": ["src/**/api/*.py"]
+        },
+        "command": "echo '📝 Remember to update API documentation in docs/api.md'"
+      }
+    ]
+  },
+
+  "skills": {
+    "_comment": "Add project-specific skills here. Skills are defined in .claude/skills/",
+    "enabled": [
+      "new-feature",
+      "new-prd",
+      "security-scan",
+      "db-migrate",
+      "test",
+      "lint",
+      "review",
+      "refactor",
+      "document",
+      "debug",
+      "optimize"
+      "_add_your_custom_skill_here"
+    ]
+  },
+
+  "agents": {
+    "_comment": "Override or extend agent prompts for project-specific needs",
+    "code-reviewer": {
+      "_comment": "Extend the base code-reviewer with project-specific checks",
+      "systemPrompt": "You are a code reviewer for [PROJECT_NAME]. Check code against the standards in prd/01_Technical_standards.md and .cursorrules. Additionally, ensure:\n- [Add project-specific requirements]\n- [Add domain-specific patterns]\n- [Add team conventions]"
+    },
+    "domain-expert": {
+      "_comment": "Example: Add a custom agent for domain-specific tasks",
+      "description": "Domain expert for [YOUR_DOMAIN]",
+      "tools": ["Read", "Grep", "Glob"],
+      "systemPrompt": "You are a domain expert for [YOUR_DOMAIN]. Help with:\n- [Domain-specific task 1]\n- [Domain-specific task 2]"
+    }
+  },
+
+  "mcp": {
+    "_comment": "Enable/configure MCP tools for this project",
+    "servers": {
+      "supabase": {
+        "description": "Database operations via Supabase",
+        "enabled": true,
+        "_note": "Configure in Cursor Settings → MCP Servers with your Supabase credentials"
+      },
+      "github": {
+        "description": "Repository management",
+        "enabled": false,
+        "_note": "Enable if you want GitHub integration. Requires GitHub token."
+      },
+      "firecrawl": {
+        "description": "Documentation research",
+        "enabled": false,
+        "_note": "Enable for web scraping and documentation research."
+      },
+      "context7": {
+        "description": "Library documentation",
+        "enabled": true,
+        "_note": "No setup required - public service"
+      }
+    }
+  },
+
+  "defaults": {
+    "_comment": "Project-specific defaults",
+    "model": "sonnet",
+    "autoCommit": false,
+    "testOnSave": false,
+    "contextWindow": "large",
+    "readFilesOnDemand": true
+  },
+
+  "projectSpecific": {
+    "_comment": "Add any project-specific configuration here",
+    "projectName": "[YOUR_PROJECT_NAME]",
+    "teamConventions": [
+      "Example: Always use dependency injection",
+      "Example: Prefer composition over inheritance",
+      "Example: Use specific error types"
+    ],
+    "domainRules": [
+      "Example: All financial calculations must use Decimal",
+      "Example: All dates must be timezone-aware"
+    ]
+  }
+}

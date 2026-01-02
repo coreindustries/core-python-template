@@ -26,6 +26,15 @@
           "commandPatterns": ["*prisma migrate*", "*prisma db push*"]
         },
         "command": "if [ \"$ENVIRONMENT\" = 'production' ]; then echo '⚠️ WARNING: Database migration in production environment. Ensure you have a backup.' && read -p 'Continue? [y/N] ' -n 1 -r && echo && [[ $REPLY =~ ^[Yy]$ ]]; fi"
+      },
+      {
+        "name": "coverage-gate",
+        "description": "Check test coverage before committing test changes",
+        "matcher": {
+          "toolNames": ["Edit", "Write"],
+          "filePatterns": ["tests/**/*.py"]
+        },
+        "command": "if command -v uv &> /dev/null; then uv run pytest --cov=src --cov-report=term-missing --cov-fail-under=100 -q || echo '⚠️ Coverage below 100%. Run: uv run pytest --cov=src' >&2; fi"
       }
     ],
     "postToolCall": [
@@ -46,6 +55,24 @@
           "commandPatterns": ["*uv add*", "*pip install*"]
         },
         "command": "echo '🔒 Dependencies changed. Consider running: /security-scan'"
+      },
+      {
+        "name": "documentation-reminder",
+        "description": "Remind to update documentation when adding new features",
+        "matcher": {
+          "toolNames": ["Edit", "Write"],
+          "filePatterns": ["src/**/api/*.py", "src/**/services/*.py"]
+        },
+        "command": "echo '📝 New API/service added. Consider updating README.md or running: /document'"
+      },
+      {
+        "name": "prd-compliance-reminder",
+        "description": "Remind to check PRD compliance for new features",
+        "matcher": {
+          "toolNames": ["Edit", "Write"],
+          "filePatterns": ["src/**/api/*.py"]
+        },
+        "command": "echo '📋 New feature added. Verify PRD compliance with: /review --prd'"
       }
     ],
     "onError": [
@@ -56,6 +83,14 @@
           "errorPatterns": ["*ruff*", "*mypy*", "*SyntaxError*"]
         },
         "command": "echo '💡 Lint/type error detected. Try: /lint --fix'"
+      },
+      {
+        "name": "test-error-helper",
+        "description": "Suggest fixes for test failures",
+        "matcher": {
+          "errorPatterns": ["*pytest*", "*AssertionError*", "*Test*"]
+        },
+        "command": "echo '💡 Test failure detected. Run: uv run pytest -xvv to see details'"
       }
     ]
   },
@@ -68,34 +103,64 @@
       "db-migrate",
       "test",
       "lint",
-      "review"
+      "review",
+      "refactor",
+      "document",
+      "debug",
+      "optimize"
     ]
   },
   "agents": {
     "code-reviewer": {
       "description": "Review code changes against project standards",
       "tools": ["Read", "Grep", "Glob"],
-      "systemPrompt": "You are a code reviewer. Check code against the standards in prd/01_Technical_standards.md. Focus on type hints, docstrings, naming conventions, and test coverage."
+      "systemPrompt": "You are a code reviewer for a Python FastAPI project. Check code against the standards in prd/01_Technical_standards.md and .cursorrules. Focus on:\n- Type hints on ALL functions and class attributes\n- Google-style docstrings on public functions/classes\n- Naming conventions (snake_case for functions, PascalCase for classes)\n- DRY principle (no code duplication)\n- Test coverage (100% required)\n- Security best practices from prd/03_Security.md\n\nProvide constructive feedback with specific examples. Suggest improvements, not just problems."
     },
     "security-auditor": {
       "description": "Perform security analysis on code",
       "tools": ["Read", "Grep", "Bash"],
-      "systemPrompt": "You are a security auditor. Check code against OWASP Top 10 and the standards in prd/03_Security.md. Look for hardcoded secrets, injection vulnerabilities, and authentication issues."
+      "systemPrompt": "You are a security auditor for a Python FastAPI application. Check code against:\n- OWASP Top 10 (see prd/03_Security.md for detailed categories)\n- Project security standards in prd/03_Security.md\n- Common vulnerabilities: SQL injection, XSS, CSRF, insecure deserialization\n- Hardcoded secrets, credentials, API keys\n- Insecure authentication/authorization patterns\n- Missing input validation\n- Insecure error handling\n\nFor each finding, provide:\n1. OWASP category (A01-A10)\n2. Severity (Critical, High, Medium, Low)\n3. Specific code location\n4. Remediation example with code\n5. Reference to relevant PRD section"
     },
     "test-generator": {
       "description": "Generate tests for new code",
       "tools": ["Read", "Write", "Edit"],
-      "systemPrompt": "You are a test generator. Create pytest tests following the patterns in tests/conftest.py. Aim for 100% coverage with unit and integration tests."
+      "systemPrompt": "You are a test generator for a Python project using pytest. Your goal is 100% test coverage.\n\nFollow these patterns:\n- Read tests/conftest.py for existing fixtures and patterns\n- Use pytest.mark.asyncio for async tests\n- Create both unit tests (tests/unit/) and integration tests (tests/integration/)\n- Use descriptive test names: test_<function>_<scenario>_<expected_result>\n- Test happy paths, edge cases, and error conditions\n- Use pytest fixtures for test data and mocks\n- Follow existing test structure and naming conventions\n\nFor each function/class, ensure:\n- All code paths are tested\n- All branches are covered\n- All error cases are handled\n- Integration tests for database/API operations"
     },
     "prd-compliance": {
       "description": "Check implementation against PRD requirements",
       "tools": ["Read", "Grep", "Glob"],
-      "systemPrompt": "You are a PRD compliance checker. Compare implementations against PRD requirements and report gaps or deviations."
+      "systemPrompt": "You are a PRD compliance checker. Compare implementations against PRD requirements in the prd/ directory.\n\nProcess:\n1. Read relevant PRD files (01_Technical_standards.md, 02_Tech_stack.md, 03_Security.md)\n2. Analyze the code implementation\n3. Check for:\n   - Compliance with technical standards (type hints, docstrings, naming)\n   - Correct technology stack usage (uv, FastAPI, Prisma, etc.)\n   - Security requirements adherence\n   - Test coverage requirements (100%)\n   - Code organization standards\n4. Generate a compliance report with:\n   - ✅ Compliant items\n   - ⚠️ Partial compliance (with recommendations)\n   - ❌ Non-compliant items (with specific fixes)\n5. Suggest PRD updates if implementation reveals gaps in requirements"
+    }
+  },
+  "mcp": {
+    "servers": {
+      "supabase": {
+        "description": "Database operations and migrations via Supabase MCP",
+        "enabled": false,
+        "note": "Enable if using Supabase. Configure in Cursor MCP settings."
+      },
+      "github": {
+        "description": "Repository management and PR creation",
+        "enabled": false,
+        "note": "Enable for GitHub integration. Requires GitHub token."
+      },
+      "firecrawl": {
+        "description": "Documentation scraping and research",
+        "enabled": false,
+        "note": "Enable for web scraping and documentation research."
+      },
+      "context7": {
+        "description": "Library documentation lookup",
+        "enabled": false,
+        "note": "Enable for quick access to library documentation."
+      }
     }
   },
   "defaults": {
     "model": "sonnet",
     "autoCommit": false,
-    "testOnSave": false
+    "testOnSave": false,
+    "contextWindow": "large",
+    "readFilesOnDemand": true
   }
 }

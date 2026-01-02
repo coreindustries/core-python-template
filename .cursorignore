@@ -1,10 +1,24 @@
 # Cursor Ignore File
 # Files listed here are excluded from Cursor's AI features (autocomplete, chat context, etc.)
 # This protects sensitive data from being sent to AI models
+#
+# IMPORTANT: This is different from .cursorindexingignore
+# - .cursorignore: Prevents files from being sent to AI (security/privacy)
+# - .cursorindexingignore: Prevents files from being indexed (performance)
+#
+# Strategy:
+# - Exclude ALL sensitive data (secrets, credentials, logs with PII)
+# - Exclude large binary files (not useful for AI)
+# - Exclude generated code (Prisma client, build artifacts)
+# - Include source code, tests, and documentation
+#
+# For more details, see: docs/CURSOR_CONTEXT_STRATEGY.md
 
 # =============================================================================
-# Environment & Secrets
+# Environment & Secrets (CRITICAL - never send to AI)
 # =============================================================================
+# Reason: Contains API keys, database passwords, and other secrets
+# Security: These files are NEVER sent to AI models, even if referenced
 .env
 .env.*
 .env.local
@@ -16,6 +30,7 @@
 .envrc
 
 # Secret files
+# Reason: Cryptographic keys and credentials must be protected
 *.pem
 *.key
 *.crt
@@ -27,8 +42,10 @@ service-account*.json
 .secrets.baseline
 
 # =============================================================================
-# Database
+# Database Files (May contain sensitive data)
 # =============================================================================
+# Reason: Database dumps may contain production data or PII
+# Security: Never send database contents to AI models
 *.sql
 *.dump
 *.sqlite
@@ -38,6 +55,9 @@ service-account*.json
 # =============================================================================
 # Logs & Debug (Contains forensic audit trails - SENSITIVE)
 # =============================================================================
+# Reason: Logs contain PII, IP addresses, user actions, and security events
+# Security: Audit logs are especially sensitive and must be protected
+# Note: Log structure/format can be documented, but actual log content is excluded
 *.log
 logs/
 audit.log
@@ -46,6 +66,8 @@ debug/
 # =============================================================================
 # Build & Dependencies
 # =============================================================================
+# Reason: Generated code and dependencies are not useful for AI context
+# Performance: These files are large and change frequently
 __pycache__/
 *.pyc
 .venv/
@@ -58,6 +80,7 @@ build/
 # =============================================================================
 # IDE & OS
 # =============================================================================
+# Reason: Editor and OS files are not part of the codebase
 .idea/
 .vscode/
 .DS_Store
@@ -66,6 +89,8 @@ Thumbs.db
 # =============================================================================
 # Coverage & Reports
 # =============================================================================
+# Reason: Generated reports, not source code
+# Note: Coverage configuration (pyproject.toml) IS included
 htmlcov/
 coverage.xml
 .coverage
@@ -74,4 +99,6 @@ coverage.xml
 # =============================================================================
 # Prisma Generated
 # =============================================================================
+# Reason: Auto-generated client code
+# Note: schema.prisma IS included (it's the source of truth)
 prisma/.client/
