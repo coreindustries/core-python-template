@@ -102,7 +102,7 @@ def db_migrate() -> None:
     import subprocess  # nosec B404  # CLI tool, safe subprocess usage
 
     rprint("[bold blue]Running database migrations...[/bold blue]")
-    result = subprocess.run(  # noqa: S603  # nosec B603, B607  # shell=False is safe, command is hardcoded
+    result = subprocess.run(  # nosec B603, B607  # shell=False is safe, command is hardcoded
         ["uv", "run", "prisma", "migrate", "deploy"],  # noqa: S607
         capture_output=True,
         text=True,
@@ -122,7 +122,7 @@ def db_generate() -> None:
     import subprocess  # nosec B404  # CLI tool, safe subprocess usage
 
     rprint("[bold blue]Generating Prisma client...[/bold blue]")
-    result = subprocess.run(  # noqa: S603  # nosec B603, B607  # shell=False is safe, command is hardcoded
+    result = subprocess.run(  # nosec B603, B607  # shell=False is safe, command is hardcoded
         ["uv", "run", "prisma", "generate"],  # noqa: S607
         capture_output=True,
         text=True,

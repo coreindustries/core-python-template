@@ -1,96 +1,91 @@
 {
-  "$schema": "https://claude.ai/claude-code/settings-schema.json",
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
-    "preToolCall": [
+    "PreToolUse": [
       {
-        "name": "sensitive-file-guard",
-        "description": "Prevent modifications to sensitive files",
-        "matcher": {
-          "toolNames": ["Edit", "Write"],
-          "filePatterns": [
-            "**/.env",
-            "**/.env.*",
-            "**/secrets/**",
-            "**/credentials/**",
-            "**/*.pem",
-            "**/*.key"
-          ]
-        },
-        "command": "echo '❌ BLOCKED: Cannot modify sensitive files (.env, secrets, credentials, keys). Use .env.example for templates.' && exit 1"
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_FILE_PATH\" =~ \\.env|secrets|credentials|\\.pem|\\.key ]]; then echo '❌ BLOCKED: Cannot modify sensitive files (.env, secrets, credentials, keys). Use .env.example for templates.' && exit 1; fi"
+          }
+        ]
       },
       {
-        "name": "production-db-guard",
-        "description": "Warn before database operations in production",
-        "matcher": {
-          "toolNames": ["Bash"],
-          "commandPatterns": ["*prisma migrate*", "*prisma db push*"]
-        },
-        "command": "if [ \"$ENVIRONMENT\" = 'production' ]; then echo '⚠️ WARNING: Database migration in production environment. Ensure you have a backup.' && read -p 'Continue? [y/N] ' -n 1 -r && echo && [[ $REPLY =~ ^[Yy]$ ]]; fi"
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_COMMAND\" =~ prisma\\ migrate|prisma\\ db\\ push ]]; then if [ \"$ENVIRONMENT\" = 'production' ]; then echo '⚠️ WARNING: Database migration in production environment. Ensure you have a backup.' && read -p 'Continue? [y/N] ' -n 1 -r && echo && [[ $REPLY =~ ^[Yy]$ ]]; fi; fi"
+          }
+        ]
       },
       {
-        "name": "coverage-gate",
-        "description": "Check test coverage before committing test changes",
-        "matcher": {
-          "toolNames": ["Edit", "Write"],
-          "filePatterns": ["tests/**/*.py"]
-        },
-        "command": "if command -v uv &> /dev/null; then uv run pytest --cov=src --cov-report=term-missing --cov-fail-under=100 -q || echo '⚠️ Coverage below 100%. Run: uv run pytest --cov=src' >&2; fi"
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_FILE_PATH\" =~ tests/.*\\.py$ ]]; then if command -v uv &> /dev/null; then uv run pytest --cov=src --cov-report=term-missing --cov-fail-under=100 -q || echo '⚠️ Coverage below 100%. Run: uv run pytest --cov=src' >&2; fi; fi"
+          }
+        ]
       }
     ],
-    "postToolCall": [
+    "PostToolUse": [
       {
-        "name": "test-reminder",
-        "description": "Remind to run tests after source file changes",
-        "matcher": {
-          "toolNames": ["Edit", "Write"],
-          "filePatterns": ["src/**/*.py"]
-        },
-        "command": "echo '💡 Source files changed. Consider running: /test'"
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_FILE_PATH\" =~ src/.*\\.py$ ]]; then echo '💡 Source files changed. Consider running: /test'; fi"
+          }
+        ]
       },
       {
-        "name": "security-scan-reminder",
-        "description": "Remind to run security scan after adding dependencies",
-        "matcher": {
-          "toolNames": ["Bash"],
-          "commandPatterns": ["*uv add*", "*pip install*"]
-        },
-        "command": "echo '🔒 Dependencies changed. Consider running: /security-scan'"
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_COMMAND\" =~ uv\\ add|pip\\ install ]]; then echo '🔒 Dependencies changed. Consider running: /security-scan'; fi"
+          }
+        ]
       },
       {
-        "name": "documentation-reminder",
-        "description": "Remind to update documentation when adding new features",
-        "matcher": {
-          "toolNames": ["Edit", "Write"],
-          "filePatterns": ["src/**/api/*.py", "src/**/services/*.py"]
-        },
-        "command": "echo '📝 New API/service added. Consider updating README.md or running: /document'"
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_FILE_PATH\" =~ src/.*/(api|services)/.*\\.py$ ]]; then echo '📝 New API/service added. Consider updating README.md or running: /document'; fi"
+          }
+        ]
       },
       {
-        "name": "prd-compliance-reminder",
-        "description": "Remind to check PRD compliance for new features",
-        "matcher": {
-          "toolNames": ["Edit", "Write"],
-          "filePatterns": ["src/**/api/*.py"]
-        },
-        "command": "echo '📋 New feature added. Verify PRD compliance with: /review --prd'"
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_FILE_PATH\" =~ src/.*/api/.*\\.py$ ]]; then echo '📋 New feature added. Verify PRD compliance with: /review --prd'; fi"
+          }
+        ]
       }
     ],
-    "onError": [
+    "PostToolUseFailure": [
       {
-        "name": "lint-error-helper",
-        "description": "Suggest fixes for common lint errors",
-        "matcher": {
-          "errorPatterns": ["*ruff*", "*mypy*", "*SyntaxError*"]
-        },
-        "command": "echo '💡 Lint/type error detected. Try: /lint --fix'"
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_ERROR\" =~ ruff|mypy|SyntaxError ]]; then echo '💡 Lint/type error detected. Try: /lint --fix'; fi"
+          }
+        ]
       },
       {
-        "name": "test-error-helper",
-        "description": "Suggest fixes for test failures",
-        "matcher": {
-          "errorPatterns": ["*pytest*", "*AssertionError*", "*Test*"]
-        },
-        "command": "echo '💡 Test failure detected. Run: uv run pytest -xvv to see details'"
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_ERROR\" =~ pytest|AssertionError|Test ]]; then echo '💡 Test failure detected. Run: uv run pytest -xvv to see details'; fi"
+          }
+        ]
       }
     ]
   },
