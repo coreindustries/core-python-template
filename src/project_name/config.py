@@ -5,6 +5,7 @@ variable support and type validation.
 """
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -23,6 +24,13 @@ class Settings(BaseSettings):
         api_port: API server port.
         cors_origins: Allowed CORS origins.
         secret_key: Secret key for security features.
+        log_json: Use JSON structured logging.
+        log_file: Optional log file path.
+        log_file_max_bytes: Max log file size before rotation.
+        log_file_backup_count: Number of backup log files.
+        log_mask_sensitive: Enable sensitive data masking.
+        log_request_body: Log request bodies (use with caution).
+        log_response_body: Log response bodies (use with caution).
     """
 
     model_config = SettingsConfigDict(
@@ -52,6 +60,15 @@ class Settings(BaseSettings):
 
     # Security
     secret_key: str = "change-me-in-production"
+
+    # Logging - Forensic Security Logging
+    log_json: bool = True  # Use JSON structured logging (recommended for production)
+    log_file: Path | None = None  # Optional: logs/app.log
+    log_file_max_bytes: int = 10_485_760  # 10 MB
+    log_file_backup_count: int = 10
+    log_mask_sensitive: bool = True  # Mask passwords, tokens, etc. in logs
+    log_request_body: bool = False  # Log request bodies (PII risk - use with caution)
+    log_response_body: bool = False  # Log response bodies (PII risk - use with caution)
 
     @property
     def is_development(self) -> bool:

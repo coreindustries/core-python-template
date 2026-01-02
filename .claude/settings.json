@@ -1,0 +1,101 @@
+{
+  "$schema": "https://claude.ai/claude-code/settings-schema.json",
+  "hooks": {
+    "preToolCall": [
+      {
+        "name": "sensitive-file-guard",
+        "description": "Prevent modifications to sensitive files",
+        "matcher": {
+          "toolNames": ["Edit", "Write"],
+          "filePatterns": [
+            "**/.env",
+            "**/.env.*",
+            "**/secrets/**",
+            "**/credentials/**",
+            "**/*.pem",
+            "**/*.key"
+          ]
+        },
+        "command": "echo '❌ BLOCKED: Cannot modify sensitive files (.env, secrets, credentials, keys). Use .env.example for templates.' && exit 1"
+      },
+      {
+        "name": "production-db-guard",
+        "description": "Warn before database operations in production",
+        "matcher": {
+          "toolNames": ["Bash"],
+          "commandPatterns": ["*prisma migrate*", "*prisma db push*"]
+        },
+        "command": "if [ \"$ENVIRONMENT\" = 'production' ]; then echo '⚠️ WARNING: Database migration in production environment. Ensure you have a backup.' && read -p 'Continue? [y/N] ' -n 1 -r && echo && [[ $REPLY =~ ^[Yy]$ ]]; fi"
+      }
+    ],
+    "postToolCall": [
+      {
+        "name": "test-reminder",
+        "description": "Remind to run tests after source file changes",
+        "matcher": {
+          "toolNames": ["Edit", "Write"],
+          "filePatterns": ["src/**/*.py"]
+        },
+        "command": "echo '💡 Source files changed. Consider running: /test'"
+      },
+      {
+        "name": "security-scan-reminder",
+        "description": "Remind to run security scan after adding dependencies",
+        "matcher": {
+          "toolNames": ["Bash"],
+          "commandPatterns": ["*uv add*", "*pip install*"]
+        },
+        "command": "echo '🔒 Dependencies changed. Consider running: /security-scan'"
+      }
+    ],
+    "onError": [
+      {
+        "name": "lint-error-helper",
+        "description": "Suggest fixes for common lint errors",
+        "matcher": {
+          "errorPatterns": ["*ruff*", "*mypy*", "*SyntaxError*"]
+        },
+        "command": "echo '💡 Lint/type error detected. Try: /lint --fix'"
+      }
+    ]
+  },
+  "skills": {
+    "directory": ".claude/skills",
+    "enabled": [
+      "new-feature",
+      "new-prd",
+      "security-scan",
+      "db-migrate",
+      "test",
+      "lint",
+      "review"
+    ]
+  },
+  "agents": {
+    "code-reviewer": {
+      "description": "Review code changes against project standards",
+      "tools": ["Read", "Grep", "Glob"],
+      "systemPrompt": "You are a code reviewer. Check code against the standards in prd/01_Technical_standards.md. Focus on type hints, docstrings, naming conventions, and test coverage."
+    },
+    "security-auditor": {
+      "description": "Perform security analysis on code",
+      "tools": ["Read", "Grep", "Bash"],
+      "systemPrompt": "You are a security auditor. Check code against OWASP Top 10 and the standards in prd/03_Security.md. Look for hardcoded secrets, injection vulnerabilities, and authentication issues."
+    },
+    "test-generator": {
+      "description": "Generate tests for new code",
+      "tools": ["Read", "Write", "Edit"],
+      "systemPrompt": "You are a test generator. Create pytest tests following the patterns in tests/conftest.py. Aim for 100% coverage with unit and integration tests."
+    },
+    "prd-compliance": {
+      "description": "Check implementation against PRD requirements",
+      "tools": ["Read", "Grep", "Glob"],
+      "systemPrompt": "You are a PRD compliance checker. Compare implementations against PRD requirements and report gaps or deviations."
+    }
+  },
+  "defaults": {
+    "model": "sonnet",
+    "autoCommit": false,
+    "testOnSave": false
+  }
+}

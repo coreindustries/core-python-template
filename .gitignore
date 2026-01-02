@@ -235,3 +235,7 @@ Thumbs.db
 
 # Docker
 docker-compose.override.yml
+
+# Application logs
+logs/
+*.log

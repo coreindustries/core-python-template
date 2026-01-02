@@ -211,3 +211,82 @@ uv run pytest                        # Run tests
 uv run pytest -x                     # Stop on first failure
 uv run pytest --cov=src              # With coverage
 ```
+
+## Skills (Slash Commands)
+
+This project includes custom skills for common workflows:
+
+| Skill | Description | Usage |
+|-------|-------------|-------|
+| `/new-feature` | Scaffold a new feature with routes, models, services, tests | `/new-feature user_profile --with-db` |
+| `/new-prd` | Create a new PRD from template | `/new-prd 04 "User Authentication"` |
+| `/security-scan` | Run comprehensive security analysis | `/security-scan --fix` |
+| `/db-migrate` | Manage Prisma migrations | `/db-migrate create --name add_users` |
+| `/test` | Run tests with coverage | `/test --coverage` |
+| `/lint` | Run linting and type checking | `/lint --fix` |
+| `/review` | Review code against standards | `/review --security` |
+
+### Skill Details
+
+**`/new-feature <name> [--with-db] [--crud]`**
+- Creates: `api/{name}.py`, `models/{name}.py`, `services/{name}.py`, `tests/unit/test_{name}.py`
+- Adds Prisma model if `--with-db`
+- Registers router automatically
+
+**`/security-scan [--fix] [--ci]`**
+- Runs: bandit, pip-audit, ruff security rules, detect-secrets
+- Generates security report with severity ratings
+- CI mode outputs JSON for pipeline integration
+
+**`/review [target] [--prd <num>] [--security]`**
+- Checks against PRD 01 standards
+- Reports: type coverage, docstrings, naming, tests
+- Security focus checks OWASP Top 10
+
+## Hooks
+
+Automated hooks for quality and security:
+
+| Hook | Trigger | Action |
+|------|---------|--------|
+| Sensitive file guard | Edit/Write to .env, secrets | Blocks modification |
+| Test reminder | Edit src/**/*.py | Reminds to run tests |
+| Security scan reminder | uv add | Suggests security scan |
+| Production DB guard | prisma migrate in prod | Requires confirmation |
+
+## Subagents
+
+Available task agents for complex operations:
+
+| Agent | Use Case | Invoke With |
+|-------|----------|-------------|
+| `code-reviewer` | Review changes against standards | Task tool |
+| `security-auditor` | Deep security analysis | Task tool |
+| `test-generator` | Generate tests for new code | Task tool |
+| `prd-compliance` | Check PRD requirements | Task tool |
+
+## Forensic Security Logging
+
+All operations are logged for audit:
+
+```python
+from project_name.logging import get_audit_logger, AuditAction
+
+audit = get_audit_logger()
+
+# Log authentication
+audit.auth_success(user_id="123", ip_address="1.2.3.4")
+audit.auth_failure(identifier="user@example.com", reason="invalid_password")
+
+# Log data access
+audit.data_access(user_id="123", resource_type="user", action=AuditAction.DATA_READ)
+
+# Log security events
+audit.security_alert(alert_type="brute_force", ip_address="1.2.3.4")
+```
+
+Logs include:
+- Correlation IDs for request tracing
+- Automatic sensitive data masking
+- JSON structured output for log aggregation
+- Separate audit.log for security events

@@ -76,14 +76,18 @@ uv run ruff check src/
 │   ├── models/           # Pydantic models
 │   ├── services/         # Business logic
 │   ├── db/               # Database utilities
+│   ├── logging/          # Forensic security logging
 │   └── utils/            # Helper functions
 ├── tests/                # Test suite
 │   ├── unit/             # Unit tests
 │   └── integration/      # Integration tests
 ├── prisma/               # Database schema
 │   └── schema.prisma
-├── scripts/              # Utility scripts
 ├── prd/                  # Product Requirements Documents
+├── .claude/              # AI automation configuration
+│   ├── settings.json     # Hooks and agent definitions
+│   ├── skills/           # Slash command definitions
+│   └── hooks/            # Hook scripts
 ├── .github/workflows/    # CI/CD pipelines
 ├── pyproject.toml        # Python project configuration
 ├── docker-compose.yml    # Docker services
@@ -220,6 +224,72 @@ When using this boilerplate for a new project:
 5. **Write tests**:
    - Add unit tests in `tests/unit/`
    - Add integration tests in `tests/integration/`
+
+## AI Automations
+
+This boilerplate includes AI-assisted development workflows for Claude Code.
+
+### Skills (Slash Commands)
+
+| Command | Description |
+|---------|-------------|
+| `/new-feature` | Scaffold a complete feature with routes, models, services, and tests |
+| `/new-prd` | Create a PRD document from template |
+| `/security-scan` | Run comprehensive security analysis (bandit, pip-audit, detect-secrets) |
+| `/db-migrate` | Safe database migration workflow with safety checks |
+| `/test` | Run tests with coverage and quality gates |
+| `/lint` | Run ruff and mypy checks with auto-fix options |
+| `/review` | Code review against PRD standards |
+
+### Hooks
+
+**Pre-tool hooks** run before Claude takes actions:
+- **sensitive-file-guard** - Blocks modifications to `.env`, secrets, credentials, and key files
+- **production-db-guard** - Warns before database migrations in production
+
+**Post-tool hooks** run after Claude completes actions:
+- **test-reminder** - Reminds to run tests after source file changes
+- **security-scan-reminder** - Reminds to scan after adding dependencies
+
+### Subagents
+
+Specialized agents available for specific tasks:
+
+| Agent | Purpose |
+|-------|---------|
+| `code-reviewer` | Review code against project standards |
+| `security-auditor` | Perform security analysis against OWASP Top 10 |
+| `test-generator` | Generate pytest tests with 100% coverage goal |
+| `prd-compliance` | Check implementations against PRD requirements |
+
+### Configuration
+
+AI automation settings are in `.claude/settings.json`. Skills are defined in `.claude/skills/`.
+
+## Forensic Security Logging
+
+Built-in structured logging with security features:
+
+```python
+from project_name.logging import get_logger, AuditLogger, correlation_id
+
+# Standard logging with correlation
+logger = get_logger(__name__)
+logger.info("Processing request", extra={"user_id": user.id})
+
+# Security audit events
+audit = AuditLogger()
+audit.auth_success(user_id="123", ip_address="192.168.1.1")
+audit.access_denied(user_id="123", resource_type="admin", resource_id="panel")
+audit.security_alert(alert_type="brute_force", severity="high", details={...})
+```
+
+Features:
+- **JSON structured output** - Machine-parseable logs for SIEM integration
+- **Correlation IDs** - Track requests across services
+- **Sensitive data masking** - Automatic redaction of passwords, tokens, keys
+- **Audit trail** - Security events with full context
+- **Request middleware** - Automatic HTTP request/response logging
 
 ## Documentation
 
