@@ -1,7 +1,7 @@
 """FastAPI application entry point.
 
 This module configures and creates the FastAPI application instance
-with forensic security logging, metrics collection, and AI capabilities.
+with forensic security logging and metrics collection.
 """
 
 from collections.abc import AsyncGenerator
@@ -13,7 +13,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from project_name import __version__
 from project_name.api.metrics import router as metrics_router
 from project_name.api.routes import router
-from project_name.api.search import router as search_router
 from project_name.config import settings
 from project_name.db import close_db_client, get_db_client
 from project_name.logging import (
@@ -115,14 +114,6 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     await close_db_client()
     logger.info("Database connection closed")
 
-    # Close AI client if initialized
-    try:
-        from project_name.ai import close_ai_client  # noqa: PLC0415
-
-        await close_ai_client()
-    except Exception:  # noqa: S110
-        pass  # AI client may not have been initialized
-
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application.
@@ -132,7 +123,7 @@ def create_app() -> FastAPI:
     """
     app = FastAPI(
         title="Project Name",  # TODO: Update project name
-        description="A Python API built with FastAPI, with AI and vector search",
+        description="A Python API built with FastAPI",
         version=__version__,
         docs_url="/docs" if settings.debug else None,
         redoc_url="/redoc" if settings.debug else None,
@@ -166,7 +157,6 @@ def create_app() -> FastAPI:
 
     # Include routers
     app.include_router(router)
-    app.include_router(search_router)
     app.include_router(metrics_router)
 
     return app

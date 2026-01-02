@@ -7,7 +7,7 @@ A production-ready Python boilerplate with FastAPI, Typer, Prisma, and best prac
 - **FastAPI** - Modern async REST API framework
 - **Typer** - Beautiful CLI interface
 - **Prisma** - Type-safe database access with prisma-client-py
-- **PostgreSQL + pgvector** - Database with vector search support
+- **PostgreSQL** - Production-ready relational database
 - **Redis** - Optional caching layer
 - **uv** - Fast Python package management
 - **Docker** - Containerized development and deployment

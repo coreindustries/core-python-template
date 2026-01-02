@@ -7,7 +7,7 @@ This is a **Python-focused boilerplate** for building production-ready applicati
 - **FastAPI** for REST APIs
 - **Typer** for CLI tools
 - **Prisma** (prisma-client-py) for database access
-- **PostgreSQL** with pgvector for vector embeddings
+- **PostgreSQL** for database access
 - **Redis** for caching (optional)
 
 ## Tech Stack
@@ -18,7 +18,7 @@ This is a **Python-focused boilerplate** for building production-ready applicati
 | Package Manager | uv (ALWAYS use uv, never pip) |
 | API Framework | FastAPI |
 | CLI Framework | Typer |
-| Database | PostgreSQL + pgvector |
+| Database | PostgreSQL |
 | ORM | Prisma (prisma-client-py) |
 | Validation | Pydantic |
 | Testing | pytest, pytest-asyncio, pytest-cov |
