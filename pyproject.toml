@@ -61,6 +61,13 @@ dev = [
 redis = [
     "redis>=5.2.0",
 ]
+ai = [
+    "openai>=1.50.0",
+    "tiktoken>=0.8.0",
+]
+metrics = [
+    "prometheus-client>=0.21.0",
+]
 
 [project.scripts]
 # CLI entry point - TODO: rename to your project
@@ -168,6 +175,9 @@ strict_concatenate = true
 module = [
     "prisma.*",
     "uvicorn.*",
+    "openai.*",
+    "tiktoken.*",
+    "prometheus_client.*",
 ]
 ignore_missing_imports = true
 

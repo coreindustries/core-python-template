@@ -1,7 +1,7 @@
 """FastAPI application entry point.
 
 This module configures and creates the FastAPI application instance
-with forensic security logging enabled.
+with forensic security logging, metrics collection, and AI capabilities.
 """
 
 from collections.abc import AsyncGenerator
@@ -10,8 +10,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from project_name import __version__
+from project_name.api.metrics import router as metrics_router
 from project_name.api.routes import router
+from project_name.api.search import router as search_router
 from project_name.config import settings
+from project_name.db import close_db_client, get_db_client
 from project_name.logging import (
     AuditAction,
     SecurityEvent,
@@ -20,6 +24,9 @@ from project_name.logging import (
     get_logger,
 )
 from project_name.logging.middleware import RequestLoggingMiddleware
+from project_name.metrics import get_metrics_collector
+from project_name.metrics.config import get_metrics_settings
+from project_name.metrics.middleware import PrometheusMetricsMiddleware
 
 
 # Configure logging before anything else
@@ -69,13 +76,27 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
             metadata={
                 "environment": settings.environment,
                 "debug": settings.debug,
-                "version": "0.1.0",
+                "version": __version__,
             },
         )
     )
 
-    # TODO: Initialize database connection
-    # TODO: Initialize Redis connection if configured
+    # Initialize database connection
+    try:
+        await get_db_client()
+        logger.info("Database connection established")
+    except Exception:
+        logger.warning("Database connection failed - some features may be unavailable")
+
+    # Initialize metrics
+    metrics_settings = get_metrics_settings()
+    if metrics_settings.enabled:
+        collector = get_metrics_collector()
+        collector.set_app_info(
+            version=__version__,
+            environment=settings.environment,
+        )
+        logger.info("Metrics collection enabled")
 
     yield
 
@@ -90,8 +111,17 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
         )
     )
 
-    # TODO: Close database connection
-    # TODO: Close Redis connection
+    # Close database connection
+    await close_db_client()
+    logger.info("Database connection closed")
+
+    # Close AI client if initialized
+    try:
+        from project_name.ai import close_ai_client  # noqa: PLC0415
+
+        await close_ai_client()
+    except Exception:  # noqa: S110
+        pass  # AI client may not have been initialized
 
 
 def create_app() -> FastAPI:
@@ -102,14 +132,22 @@ def create_app() -> FastAPI:
     """
     app = FastAPI(
         title="Project Name",  # TODO: Update project name
-        description="A Python API built with FastAPI",
-        version="0.1.0",
+        description="A Python API built with FastAPI, with AI and vector search",
+        version=__version__,
         docs_url="/docs" if settings.debug else None,
         redoc_url="/redoc" if settings.debug else None,
         lifespan=lifespan,
     )
 
-    # Add request logging middleware (first, so it wraps everything)
+    # Add metrics middleware (first for accurate timing)
+    metrics_settings = get_metrics_settings()
+    if metrics_settings.enabled:
+        app.add_middleware(
+            PrometheusMetricsMiddleware,
+            exclude_paths=["/health", "/metrics", "/favicon.ico"],
+        )
+
+    # Add request logging middleware
     app.add_middleware(
         RequestLoggingMiddleware,
         exclude_paths=["/health", "/metrics", "/favicon.ico"],
@@ -128,6 +166,8 @@ def create_app() -> FastAPI:
 
     # Include routers
     app.include_router(router)
+    app.include_router(search_router)
+    app.include_router(metrics_router)
 
     return app
 
