@@ -1,112 +1,213 @@
-# Instructions for Using claude.md
-
-## What is claude.md?
-
-`claude.md` is a special file that provides context and instructions to AI assistants (like Claude) when working with your project. This file helps AI understand your project's specific requirements, conventions, and preferences.
-
-## How to Use This File
-
-### 1. Add Project-Specific Context
-
-Include information that helps AI assistants understand your project:
-
-- **Project Overview**: Brief description of what the project does
-- **Key Technologies**: Main frameworks, libraries, and tools you're using
-- **Architecture Patterns**: How your codebase is organized
-- **Coding Conventions**: Style preferences, naming conventions, etc.
-- **Common Patterns**: Reusable patterns or utilities in your codebase
-- **Important Files**: Key files or directories AI should be aware of
-
-### 2. Add AI Assistant Instructions
-
-Specify how you want AI assistants to behave:
-
-- **Code Style Preferences**: How you want code formatted or structured
-- **Testing Requirements**: Whether tests should be written, what testing framework
-- **Documentation Standards**: How documentation should be written
-- **Error Handling**: Preferred error handling patterns
-- **Performance Considerations**: Any performance requirements or optimizations
-
-### 3. Reference Your PRDs
-
-Since this is a PRD-driven project:
-
-- Reference your technical standards document: `prd/0_Technical_standards_and_tech_stack.md`
-- Mention that PRDs should be followed when implementing features
-- Note that PRDs are the source of truth for requirements
-
-### 4. Keep It Updated
-
-- Update `claude.md` as your project evolves
-- Add new conventions or patterns as they emerge
-- Remove outdated information
-- Keep it concise but comprehensive
-
-## Example Structure
-
-Here's a suggested structure for your `claude.md`:
-
-```markdown
-# Project Context for AI Assistants
+# Claude Code Instructions
 
 ## Project Overview
 
-[Brief description of your project]
+This is a **Python-focused boilerplate** for building production-ready applications with:
+
+- **FastAPI** for REST APIs
+- **Typer** for CLI tools
+- **Prisma** (prisma-client-py) for database access
+- **PostgreSQL** with pgvector for vector embeddings
+- **Redis** for caching (optional)
 
 ## Tech Stack
 
-- Backend: [Your backend stack]
-- Frontend: [Your frontend stack]
-- Database: [Your database]
-- Other tools: [Other important tools]
+| Component | Technology |
+|-----------|------------|
+| Language | Python 3.12+ |
+| Package Manager | uv (ALWAYS use uv, never pip) |
+| API Framework | FastAPI |
+| CLI Framework | Typer |
+| Database | PostgreSQL + pgvector |
+| ORM | Prisma (prisma-client-py) |
+| Validation | Pydantic |
+| Testing | pytest, pytest-asyncio, pytest-cov |
+| Linting | ruff (replaces black, flake8, isort) |
+| Type Checking | mypy (strict mode) |
+| Security | bandit, pip-audit |
+| Containers | Docker, docker-compose |
 
-## Key Conventions
+## Critical Rules
 
-- [Important coding conventions]
-- [Naming patterns]
-- [File organization]
+### Package Management
+
+```bash
+# ALWAYS use uv
+uv sync                    # Install dependencies
+uv add package-name        # Add dependency
+uv run python script.py    # Run Python
+uv run pytest              # Run tests
+
+# NEVER do this
+pip install x              # NO!
+python script.py           # NO - use uv run
+```
+
+### Code Standards
+
+1. **Type hints required** on ALL functions and class attributes
+2. **Docstrings required** on all public functions/classes (Google style)
+3. **100% test coverage** required
+4. **ruff** for linting and formatting
+5. **mypy strict mode** for type checking
+
+### File Organization
+
+```
+src/project_name/       # Source code
+├── main.py             # FastAPI app
+├── cli.py              # Typer CLI
+├── config.py           # Settings (pydantic-settings)
+├── api/                # API routes
+├── models/             # Pydantic models
+├── services/           # Business logic
+├── db/                 # Database utilities
+└── utils/              # Helpers
+tests/                  # Test files
+├── unit/               # Unit tests
+└── integration/        # Integration tests
+scripts/                # Utility scripts
+prisma/                 # Prisma schema
+prd/                    # Product Requirements Documents
+```
+
+### Environment Variables
+
+- Use `pydantic-settings` for configuration
+- Store in `.env` file (never commit)
+- Document in `.env.example`
+- Load once at startup via `config.py`
+
+### Database
+
+- Prisma schema is source of truth: `prisma/schema.prisma`
+- Generate client: `uv run prisma generate`
+- Run migrations: `uv run prisma migrate deploy`
+- Use async client from `project_name.db`
+
+### Testing
+
+```bash
+# Run all tests
+uv run pytest
+
+# With coverage
+uv run pytest --cov=src --cov-report=term-missing
+
+# Specific test
+uv run pytest tests/unit/test_config.py -v
+```
+
+### Docker
+
+```bash
+# Start services (Postgres, Redis)
+docker-compose up -d postgres redis
+
+# Run app in container
+docker-compose up app
+
+# Full stack
+docker-compose up
+```
 
 ## PRD-Driven Development
 
-- All features must follow PRDs in the `prd/` directory
-- Reference `prd/0_Technical_standards_and_tech_stack.md` for technical standards
-- Use `prd/PRD_TEMPLATE.md` as a template for new PRDs
+All features must follow PRDs in the `prd/` directory:
 
-## Code Style
-
-- [Your specific code style preferences]
-- [Linting/formatting tools]
-- [Type safety requirements]
+- `prd/01_Technical_standards.md` - Code standards and best practices
+- `prd/02_Tech_stack.md` - Technology stack details
+- `prd/03_Security.md` - Security requirements
+- `prd/PRD_TEMPLATE.md` - Template for new PRDs
 
 ## Common Patterns
 
-- [Reusable patterns in your codebase]
-- [Utility functions or helpers]
-- [Architecture patterns]
+### FastAPI Route
 
-## Important Files/Directories
+```python
+from fastapi import APIRouter, HTTPException, status
+from project_name.models import UserCreate, User
+from project_name.services import UserService
 
-- `prd/` - Product Requirements Documents
-- [Other important paths]
+router = APIRouter(prefix="/users", tags=["users"])
+
+@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
+async def create_user(data: UserCreate) -> User:
+    """Create a new user."""
+    service = UserService()
+    return await service.create(data)
 ```
 
-## Tips
+### Pydantic Model
 
-1. **Be Specific**: The more specific you are, the better AI assistants can help you
-2. **Use Examples**: Include code examples of patterns you want followed
-3. **Reference Files**: Point to existing files that demonstrate your conventions
-4. **Keep It Focused**: Don't include everything—focus on what's most important for AI assistants to know
-5. **Version Control**: Commit `claude.md` to your repository so it's available to all team members
+```python
+from pydantic import BaseModel, EmailStr, Field
 
-## How AI Assistants Use This File
+class UserCreate(BaseModel):
+    email: EmailStr
+    name: str = Field(min_length=1, max_length=100)
+```
 
-When you work with an AI assistant in this project:
+### Database Query
 
-1. The AI will read `claude.md` to understand your project context
-2. It will follow the conventions and patterns you've specified
-3. It will reference your PRDs and technical standards
-4. It will generate code that matches your style and requirements
+```python
+from project_name.db import get_db
 
----
+async def get_user(user_id: str) -> User | None:
+    async with get_db() as db:
+        return await db.user.find_unique(where={"id": user_id})
+```
 
-**Note**: This file is currently empty. Populate it with your project-specific information to get the most value from AI assistants.
+### CLI Command
+
+```python
+import typer
+from rich import print
+
+app = typer.Typer()
+
+@app.command()
+def greet(name: str) -> None:
+    """Greet someone."""
+    print(f"[green]Hello, {name}![/green]")
+```
+
+## When Making Changes
+
+1. **Read existing code first** - Understand patterns before modifying
+2. **Follow existing conventions** - Match the codebase style
+3. **Write tests** - 100% coverage required
+4. **Run checks** before committing:
+   ```bash
+   uv run ruff check src/ tests/
+   uv run ruff format src/ tests/
+   uv run mypy src/
+   uv run pytest
+   ```
+5. **Update documentation** if adding new patterns
+
+## Useful Commands
+
+```bash
+# Development
+uv sync                              # Install deps
+uv run app serve                     # Start API server
+uv run app info                      # Show config
+docker-compose up -d postgres redis  # Start services
+
+# Quality
+uv run ruff check --fix src/         # Lint and fix
+uv run ruff format src/              # Format
+uv run mypy src/                     # Type check
+uv run bandit -r src/                # Security scan
+
+# Database
+uv run prisma generate               # Generate client
+uv run prisma migrate dev            # Create migration
+uv run prisma migrate deploy         # Apply migrations
+
+# Testing
+uv run pytest                        # Run tests
+uv run pytest -x                     # Stop on first failure
+uv run pytest --cov=src              # With coverage
+```

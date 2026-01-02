@@ -103,3 +103,4 @@ TRACING_ENDPOINT=http://jaeger:14268
 
 **Status:** This PRD is a placeholder and will be expanded as observability requirements are defined.
 
+
