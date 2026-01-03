@@ -1,20 +1,77 @@
-# Python Project Boilerplate
+# Core Python Template
 
-A production-ready Python boilerplate with FastAPI, Typer, Prisma, and best practices baked in.
+A batteries-included Python boilerplate optimized for AI-assisted development with **Cursor** and **Claude Code**.
 
-## Features
+## Why This Template?
 
-- **FastAPI** - Modern async REST API framework
-- **Typer** - Beautiful CLI interface
-- **Prisma** - Type-safe database access with prisma-client-py
-- **PostgreSQL** - Production-ready relational database
-- **Redis** - Optional caching layer
-- **uv** - Fast Python package management
-- **Docker** - Containerized development and deployment
-- **100% Type Coverage** - Strict mypy configuration
-- **Full Test Suite** - pytest with async support
-- **CI/CD Ready** - GitHub Actions workflow included
-- **Pre-commit Hooks** - Automated code quality checks
+Modern AI coding assistants work best when they have clear context, enforced standards, and guardrails. This template provides:
+
+- **PRD-driven development** — Claude acts as a senior engineer, reviewing code against documented requirements
+- **AI-aware tooling** — Skills (slash commands), hooks, and subagents purpose-built for Claude Code
+- **Enforced consistency** — Type hints, docstrings, and 100% test coverage aren't optional
+- **Security by default** — Sensitive file protection, audit logging, and automated scanning
+
+### The 80/20 Workflow
+
+In practice, ~80% of feature development happens in Cursor with AI assistance:
+
+1. **You** write PRDs describing what you want
+2. **Claude** implements features following the documented standards
+3. **Claude** reviews its own work via subagents (code review, security audit, PRD compliance)
+4. **You** review, iterate, and approve
+
+The remaining 20% is architecture decisions, edge cases, and the creative work that benefits from human judgment.
+
+## What's Included
+
+### Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Language | Python 3.12+ with strict typing |
+| Package Manager | uv (fast, modern) |
+| API Framework | FastAPI |
+| CLI Framework | Typer + Rich |
+| Database | PostgreSQL + Prisma ORM |
+| Caching | Redis (optional) |
+| Testing | pytest (100% coverage required) |
+| Quality | ruff, mypy strict, bandit, pre-commit |
+| Containers | Docker + docker-compose |
+
+### AI Development Features
+
+| Feature | Purpose |
+|---------|---------|
+| `CLAUDE.md` | Instructions Claude follows for this codebase |
+| `.claude/settings.json` | Hooks, skills, and subagent definitions |
+| `.claude/skills/` | Slash commands (`/new-feature`, `/test`, `/review`, etc.) |
+| `prd/` | Product requirement documents Claude references |
+| Forensic logging | Audit trail for security-sensitive operations |
+
+### Project Standards
+
+| Requirement | Enforcement |
+|-------------|-------------|
+| Type hints on all functions | mypy strict mode |
+| Google-style docstrings | ruff rules |
+| 100% test coverage | pytest-cov fail-under |
+| No secrets in code | detect-secrets + hooks |
+| Consistent formatting | ruff format + pre-commit |
+
+## Who Should Use This
+
+**Good fit:**
+- You're building APIs, CLIs, or backend services in Python
+- You use Cursor, Claude Code, or similar AI coding assistants
+- You want guardrails that keep AI-generated code consistent and secure
+- You prefer PRD-driven development over ad-hoc feature requests
+- You value strict typing, testing, and documentation
+
+**Not a good fit:**
+- You need a minimal/lightweight starter (this is opinionated and batteries-included)
+- You're building data science notebooks or ML pipelines (consider a data-focused template)
+- You don't use AI coding assistants (the `.claude/` tooling won't benefit you)
+- You prefer Django, Flask, or other frameworks over FastAPI
 
 ## Quick Start
 
@@ -28,9 +85,9 @@ A production-ready Python boilerplate with FastAPI, Typer, Prisma, and best prac
 ### Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/your-project.git
-cd your-project
+# Clone or use as template
+git clone https://github.com/YOUR_USERNAME/YOUR_PROJECT.git
+cd YOUR_PROJECT
 
 # Install dependencies
 uv sync
@@ -198,32 +255,60 @@ uv run pytest tests/unit/test_config.py -v
 uv run pytest -n auto
 ```
 
-## Customizing This Boilerplate
+## Customizing This Template
 
-When using this boilerplate for a new project:
+### Initial Setup
 
 1. **Rename the package**: Replace `project_name` with your actual project name
-   - Update `src/project_name/` directory name
-   - Update imports in all files
-   - Update `pyproject.toml` project name and scripts
+   ```bash
+   # Rename directory
+   mv src/project_name src/your_project
 
-2. **Update configuration**:
-   - Edit `pyproject.toml` with your project details
-   - Update `.env.example` with your required variables
-   - Modify `docker-compose.yml` service names if needed
+   # Update all imports (Claude can help with this)
+   # Update pyproject.toml name and scripts
+   ```
 
-3. **Define your data model**:
+2. **Update metadata** in `pyproject.toml`:
+   - Project name, description, authors
+   - Repository URLs
+   - License if not MIT
+
+3. **Configure your database**:
    - Edit `prisma/schema.prisma` with your models
-   - Run `uv run prisma generate` to create the client
+   - Run `uv run prisma generate`
 
-4. **Implement your features**:
-   - Add routes in `src/project_name/api/`
-   - Add models in `src/project_name/models/`
-   - Add services in `src/project_name/services/`
+### Starting Development with AI
 
-5. **Write tests**:
-   - Add unit tests in `tests/unit/`
-   - Add integration tests in `tests/integration/`
+The recommended workflow for new features:
+
+1. **Write a PRD first** — Use `/new-prd` or copy `prd/PRD_TEMPLATE.md`
+   ```bash
+   # In Claude Code
+   /new-prd 04 "User Authentication"
+   ```
+
+2. **Let Claude implement** — Reference the PRD in your prompt
+   ```
+   Implement the user authentication feature described in prd/04_User_Authentication.md
+   ```
+
+3. **Review with subagents** — Claude can self-review
+   ```
+   Review this implementation against the PRD requirements
+   Run a security audit on the auth module
+   ```
+
+4. **Iterate** — Fix issues, run tests, repeat
+
+### Adding Features Manually
+
+If working without AI assistance:
+
+- Add routes in `src/your_project/api/`
+- Add Pydantic models in `src/your_project/models/`
+- Add business logic in `src/your_project/services/`
+- Add tests in `tests/unit/` and `tests/integration/`
+- Run quality checks: `uv run ruff check && uv run mypy src/`
 
 ## AI Automations
 
