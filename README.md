@@ -101,8 +101,11 @@ uv sync
 # Copy environment file
 cp .env.example .env
 
-# Start database services
-docker-compose up -d postgres redis
+# Start database and observability services
+docker-compose up -d postgres redis prometheus grafana loki
+
+# Or start just databases for minimal setup
+# docker-compose up -d postgres redis
 
 # Generate Prisma client
 uv run prisma generate
@@ -231,6 +234,35 @@ docker build --target production -t app:latest .
 # Run production container
 docker run -p 8000:8000 app:latest
 ```
+
+### Observability & Monitoring
+
+Full observability stack with metrics, logs, and traces:
+
+```bash
+# Start observability services
+docker-compose up -d prometheus grafana loki promtail jaeger
+
+# Access dashboards
+open http://localhost:3000  # Grafana (admin/admin)
+open http://localhost:9090  # Prometheus
+open http://localhost:16686 # Jaeger
+```
+
+**Services:**
+- **Prometheus** (`:9090`) - Metrics collection
+- **Grafana** (`:3000`) - Visualization dashboards
+- **Loki** (`:3100`) - Log aggregation
+- **Jaeger** (`:16686`) - Distributed tracing
+
+**What's monitored:**
+- HTTP request rates, latency, errors
+- In-flight request counts
+- AI token usage (if enabled)
+- Application logs (JSON structured)
+- Custom business metrics
+
+See [observability/README.md](observability/README.md) for detailed documentation.
 
 ## Configuration
 

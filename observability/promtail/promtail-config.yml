@@ -1,0 +1,36 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Application logs
+  - job_name: app
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: app
+          __path__: /var/log/app/*.log
+    pipeline_stages:
+      # Parse JSON logs
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            logger: logger
+            correlation_id: correlation_id
+      # Extract level to use as label
+      - labels:
+          level:
+          logger:
+      # Set timestamp
+      - timestamp:
+          source: timestamp
+          format: RFC3339
