@@ -35,7 +35,7 @@ FROM base AS dependencies
 COPY pyproject.toml uv.lock* ./
 
 # Install dependencies (without dev dependencies for smaller image)
-RUN uv sync --frozen --no-dev --no-install-project
+RUN uv sync --frozen --no-install-project
 
 # -----------------------------------------------------------------------------
 # Development stage: Full development environment
@@ -83,7 +83,7 @@ COPY prisma/ ./prisma/
 COPY pyproject.toml ./
 
 # Install the project
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen
 
 # Generate Prisma client
 RUN uv run prisma generate
