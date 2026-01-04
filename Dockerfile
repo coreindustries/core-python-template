@@ -80,7 +80,7 @@ COPY --from=dependencies /app/.venv /app/.venv
 # Copy source code and dependency files
 COPY src/ ./src/
 COPY prisma/ ./prisma/
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock README.md ./
 
 # Install the project
 RUN uv sync --frozen
