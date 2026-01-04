@@ -38,6 +38,8 @@ dependencies = [
     "httpx>=0.28.0",
     # Async
     "anyio>=4.7.0",
+    # Metrics
+    "prometheus-client>=0.21.0",
 ]
 
 [project.optional-dependencies]
@@ -60,9 +62,6 @@ dev = [
 ]
 redis = [
     "redis>=5.2.0",
-]
-metrics = [
-    "prometheus-client>=0.21.0",
 ]
 
 [project.scripts]

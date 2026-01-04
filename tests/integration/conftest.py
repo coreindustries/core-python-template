@@ -15,7 +15,7 @@ from project_name.db import close_db_client, get_db_client
 from project_name.main import app
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def anyio_backend() -> str:
     """Configure anyio backend for async tests.
 
@@ -25,11 +25,11 @@ def anyio_backend() -> str:
     return "asyncio"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 async def db_client() -> AsyncGenerator[Prisma, None]:
     """Provide database client for integration tests.
 
-    Session-scoped for performance - connection reused across tests.
+    Function-scoped to match pytest-asyncio event loop scope.
 
     Yields:
         Prisma database client.
