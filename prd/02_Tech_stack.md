@@ -8,9 +8,10 @@ last_updated: "2025-01-02"
 
 ## 1. Language & Runtime
 
-### 1.1 Python 3.12+
+### 1.1 Python 3.13+
 
 - Primary language for all backend services, workers, APIs, and CLI tools
+- Minimum version: Python 3.12 (3.13+ recommended for ~10% performance improvement)
 - Uses `asyncio` for I/O concurrency and process pools for CPU-bound work
 - **REQUIRED:** All Python code MUST use type hints (typed Python)
 - Use `mypy` for static type checking

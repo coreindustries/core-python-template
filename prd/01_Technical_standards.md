@@ -12,9 +12,9 @@ This document establishes the technical standards, best practices, and requireme
 
 ## 2. Language Requirements
 
-### 2.1 Python 3.12+
+### 2.1 Python 3.13+
 
-- Minimum version: Python 3.12
+- Minimum version: Python 3.12 (3.13+ recommended)
 - Use modern Python features (match statements, type unions with `|`, etc.)
 - **REQUIRED:** All Python code MUST use type hints
 - Use `mypy` for static type checking
@@ -305,7 +305,7 @@ select = [
 ]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 strict = true
 warn_return_any = true
 warn_unused_ignores = true

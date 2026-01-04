@@ -17,7 +17,7 @@
 
 | Component | Technology |
 |-----------|------------|
-| Language | Python 3.12+ |
+| Language | Python 3.13+ |
 | Package Manager | uv |
 | API Framework | FastAPI |
 | CLI Framework | Typer |
