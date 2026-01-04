@@ -77,10 +77,10 @@ RUN groupadd --gid 1000 appgroup && \
 # Copy installed dependencies from dependencies stage
 COPY --from=dependencies /app/.venv /app/.venv
 
-# Copy source code
+# Copy source code and dependency files
 COPY src/ ./src/
 COPY prisma/ ./prisma/
-COPY pyproject.toml ./
+COPY pyproject.toml uv.lock ./
 
 # Install the project
 RUN uv sync --frozen
