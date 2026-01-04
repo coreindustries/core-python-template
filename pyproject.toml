@@ -16,6 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Framework :: FastAPI",
     "Typing :: Typed",
 ]
@@ -90,7 +91,7 @@ packages = ["src/project_name"]
 # =============================================================================
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py313"
 line-length = 88
 src = ["src", "tests"]
 
@@ -146,7 +147,7 @@ docstring-code-format = true
 # =============================================================================
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 strict = true
 warn_return_any = true
 warn_unused_ignores = true

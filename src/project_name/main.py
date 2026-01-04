@@ -44,7 +44,7 @@ audit = get_audit_logger()
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     """Application lifespan manager.
 
     Handles startup and shutdown events for the application.

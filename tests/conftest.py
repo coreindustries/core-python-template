@@ -18,7 +18,7 @@ def anyio_backend() -> str:
 
 
 @pytest.fixture
-async def client() -> AsyncGenerator[AsyncClient, None]:
+async def client() -> AsyncGenerator[AsyncClient]:
     """Provide async HTTP client for API testing.
 
     Yields:

@@ -36,7 +36,7 @@ async def close_db_client() -> None:
 
 
 @asynccontextmanager
-async def get_db() -> AsyncGenerator[Prisma, None]:
+async def get_db() -> AsyncGenerator[Prisma]:
     """Context manager for database operations.
 
     Provides a database client that is automatically connected.

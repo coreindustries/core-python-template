@@ -26,7 +26,7 @@ def anyio_backend() -> str:
 
 
 @pytest.fixture
-async def db_client() -> AsyncGenerator[Prisma, None]:
+async def db_client() -> AsyncGenerator[Prisma]:
     """Provide database client for integration tests.
 
     Function-scoped to match pytest-asyncio event loop scope.
@@ -40,7 +40,7 @@ async def db_client() -> AsyncGenerator[Prisma, None]:
 
 
 @pytest.fixture
-async def db(db_client: Prisma) -> AsyncGenerator[Prisma, None]:
+async def db(db_client: Prisma) -> AsyncGenerator[Prisma]:
     """Provide database client for a single test.
 
     Uses the session-scoped client but provides test isolation.
@@ -58,7 +58,7 @@ async def db(db_client: Prisma) -> AsyncGenerator[Prisma, None]:
 
 
 @pytest.fixture
-async def integration_client() -> AsyncGenerator[AsyncClient, None]:
+async def integration_client() -> AsyncGenerator[AsyncClient]:
     """Provide HTTP client for API integration tests.
 
     Uses ASGI transport to test the FastAPI app directly.
