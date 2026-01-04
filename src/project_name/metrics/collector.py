@@ -108,7 +108,7 @@ class MetricsCollector:
             Prometheus Counter for request counts.
         """
         self._initialize()
-        assert self._request_count is not None
+        assert self._request_count is not None  # nosec B101  # Type narrowing after init
         return self._request_count
 
     @property
@@ -119,7 +119,7 @@ class MetricsCollector:
             Prometheus Histogram for request latency.
         """
         self._initialize()
-        assert self._request_latency is not None
+        assert self._request_latency is not None  # nosec B101  # Type narrowing after init
         return self._request_latency
 
     @property
@@ -130,7 +130,7 @@ class MetricsCollector:
             Prometheus Gauge for in-progress requests.
         """
         self._initialize()
-        assert self._requests_in_progress is not None
+        assert self._requests_in_progress is not None  # nosec B101  # Type narrowing after init
         return self._requests_in_progress
 
     @property
@@ -141,7 +141,7 @@ class MetricsCollector:
             Prometheus Info for application metadata.
         """
         self._initialize()
-        assert self._app_info is not None
+        assert self._app_info is not None  # nosec B101  # Type narrowing after init
         return self._app_info
 
     @property
@@ -152,7 +152,7 @@ class MetricsCollector:
             Prometheus Counter for AI token usage.
         """
         self._initialize()
-        assert self._ai_token_usage is not None
+        assert self._ai_token_usage is not None  # nosec B101  # Type narrowing after init
         return self._ai_token_usage
 
     @property
@@ -163,7 +163,7 @@ class MetricsCollector:
             Prometheus Histogram for AI request latency.
         """
         self._initialize()
-        assert self._ai_request_latency is not None
+        assert self._ai_request_latency is not None  # nosec B101  # Type narrowing after init
         return self._ai_request_latency
 
     def set_app_info(self, version: str, environment: str) -> None:
@@ -234,13 +234,13 @@ class MetricsCollector:
         if prompt_tokens > 0:
             self.ai_token_usage.labels(
                 model=model,
-                token_type="prompt",  # noqa: S106
+                token_type="prompt",  # nosec B106  # Not a password, token type label
             ).inc(prompt_tokens)
 
         if completion_tokens > 0:
             self.ai_token_usage.labels(
                 model=model,
-                token_type="completion",  # noqa: S106
+                token_type="completion",  # nosec B106  # Not a password, token type label
             ).inc(completion_tokens)
 
 

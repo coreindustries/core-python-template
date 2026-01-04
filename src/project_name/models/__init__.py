@@ -18,31 +18,3 @@ class BaseSchema(BaseModel):
         str_strip_whitespace=True,  # Strip whitespace from strings
         validate_assignment=True,  # Validate on attribute assignment
     )
-
-
-# =============================================================================
-# Example Models - uncomment and modify as needed
-# =============================================================================
-
-# from datetime import datetime
-# from pydantic import EmailStr, Field
-
-# class UserBase(BaseSchema):
-#     """Base user schema with common fields."""
-#     email: EmailStr
-#     name: str = Field(min_length=1, max_length=100)
-
-# class UserCreate(UserBase):
-#     """Schema for creating a new user."""
-#     pass
-
-# class UserUpdate(BaseSchema):
-#     """Schema for updating a user."""
-#     email: EmailStr | None = None
-#     name: str | None = Field(default=None, min_length=1, max_length=100)
-
-# class User(UserBase):
-#     """Schema for user responses."""
-#     id: str
-#     created_at: datetime
-#     updated_at: datetime

@@ -4,6 +4,7 @@ Provides comprehensive audit logging for all HTTP requests.
 """
 
 import time
+import uuid
 from collections.abc import Callable
 from typing import Any
 
@@ -177,8 +178,6 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             return correlation_id
 
         # Generate new ID
-        import uuid
-
         return str(uuid.uuid4())
 
     def _get_client_ip(self, request: Request) -> str:
