@@ -12,7 +12,8 @@ A batteries-included Python boilerplate optimized for AI-assisted development wi
 
 Modern AI coding assistants work best when they have clear context, enforced standards, and guardrails. This template provides:
 
-- **PRD-driven development** — Claude acts as a senior engineer, reviewing code against documented requirements
+- **PRD-driven development** — Start by writing Product Requirements Documents (PRDs), then using planning tools (in Cursor or Claude Code) to implement them. We have a basic set of technical standards, security best practices and observability built in.
+- **AI-assisted development** — Claude acts as a senior engineer, reviewing code against documented requirements
 - **AI-aware tooling** — Skills (slash commands), hooks, and subagents purpose-built for Claude Code
 - **Enforced consistency** — Type hints, docstrings, and 100% test coverage aren't optional
 - **Security by default** — Sensitive file protection, audit logging, and automated scanning
@@ -22,8 +23,8 @@ Modern AI coding assistants work best when they have clear context, enforced sta
 In practice, ~80% of feature development happens in Cursor with AI assistance:
 
 1. **You** write PRDs describing what you want
-2. **Claude** implements features following the documented standards
-3. **Claude** reviews its own work via subagents (code review, security audit, PRD compliance)
+2. **Cursor** Plan mode to build a plan for 1 PRD at a time, and then implements features following the documented standards
+3. **Claude** Periodically, use claude to review Cursor's work via subagents (code review, security audit, PRD compliance)
 4. **You** review, iterate, and approve
 
 The remaining 20% is architecture decisions, edge cases, and the creative work that benefits from human judgment.
@@ -32,41 +33,42 @@ The remaining 20% is architecture decisions, edge cases, and the creative work t
 
 ### Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| Language | Python 3.12+ with strict typing |
-| Package Manager | uv (fast, modern) |
-| API Framework | FastAPI |
-| CLI Framework | Typer + Rich |
-| Database | PostgreSQL + Prisma ORM |
-| Caching | Redis (optional) |
-| Testing | pytest (100% coverage required) |
-| Quality | ruff, mypy strict, bandit, pre-commit |
-| Containers | Docker + docker-compose |
+| Component       | Technology                            |
+| --------------- | ------------------------------------- |
+| Language        | Python 3.12+ with strict typing       |
+| Package Manager | uv (fast, modern)                     |
+| API Framework   | FastAPI                               |
+| CLI Framework   | Typer + Rich                          |
+| Database        | PostgreSQL + Prisma ORM               |
+| Caching         | Redis (optional)                      |
+| Testing         | pytest (100% coverage required)       |
+| Quality         | ruff, mypy strict, bandit, pre-commit |
+| Containers      | Docker + docker-compose               |
 
 ### AI Development Features
 
-| Feature | Purpose |
-|---------|---------|
-| `CLAUDE.md` | Instructions Claude follows for this codebase |
-| `.claude/settings.json` | Hooks, skills, and subagent definitions |
-| `.claude/skills/` | Slash commands (`/new-feature`, `/test`, `/review`, etc.) |
-| `prd/` | Product requirement documents Claude references |
-| Forensic logging | Audit trail for security-sensitive operations |
+| Feature                 | Purpose                                                   |
+| ----------------------- | --------------------------------------------------------- |
+| `CLAUDE.md`             | Instructions Claude follows for this codebase             |
+| `.claude/settings.json` | Hooks, skills, and subagent definitions                   |
+| `.claude/skills/`       | Slash commands (`/new-feature`, `/test`, `/review`, etc.) |
+| `prd/`                  | Product requirement documents Claude references           |
+| Forensic logging        | Audit trail for security-sensitive operations             |
 
 ### Project Standards
 
-| Requirement | Enforcement |
-|-------------|-------------|
-| Type hints on all functions | mypy strict mode |
-| Google-style docstrings | ruff rules |
-| 100% test coverage | pytest-cov fail-under |
-| No secrets in code | detect-secrets + hooks |
-| Consistent formatting | ruff format + pre-commit |
+| Requirement                 | Enforcement              |
+| --------------------------- | ------------------------ |
+| Type hints on all functions | mypy strict mode         |
+| Google-style docstrings     | ruff rules               |
+| 100% test coverage          | pytest-cov fail-under    |
+| No secrets in code          | detect-secrets + hooks   |
+| Consistent formatting       | ruff format + pre-commit |
 
 ## Who Should Use This
 
 **Good fit:**
+
 - You're building APIs, CLIs, or backend services in Python
 - You use Cursor, Claude Code, or similar AI coding assistants
 - You want guardrails that keep AI-generated code consistent and secure
@@ -74,6 +76,7 @@ The remaining 20% is architecture decisions, edge cases, and the creative work t
 - You value strict typing, testing, and documentation
 
 **Not a good fit:**
+
 - You need a minimal/lightweight starter (this is opinionated and batteries-included)
 - You're building data science notebooks or ML pipelines (consider a data-focused template)
 - You don't use AI coding assistants (the `.claude/` tooling won't benefit you)
@@ -250,12 +253,14 @@ open http://localhost:16686 # Jaeger
 ```
 
 **Services:**
+
 - **Prometheus** (`:9090`) - Metrics collection
 - **Grafana** (`:3000`) - Visualization dashboards
 - **Loki** (`:3100`) - Log aggregation
 - **Jaeger** (`:16686`) - Distributed tracing
 
 **What's monitored:**
+
 - HTTP request rates, latency, errors
 - In-flight request counts
 - AI token usage (if enabled)
@@ -268,14 +273,14 @@ See [observability/README.md](observability/README.md) for detailed documentatio
 
 Configuration is managed via environment variables. See `.env.example` for all options.
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | Required |
-| `REDIS_URL` | Redis connection string | Optional |
-| `DEBUG` | Enable debug mode | `false` |
-| `LOG_LEVEL` | Logging level | `INFO` |
-| `API_HOST` | API bind host | `0.0.0.0` |
-| `API_PORT` | API bind port | `8000` |
+| Variable       | Description                  | Default   |
+| -------------- | ---------------------------- | --------- |
+| `DATABASE_URL` | PostgreSQL connection string | Required  |
+| `REDIS_URL`    | Redis connection string      | Optional  |
+| `DEBUG`        | Enable debug mode            | `false`   |
+| `LOG_LEVEL`    | Logging level                | `INFO`    |
+| `API_HOST`     | API bind host                | `0.0.0.0` |
+| `API_PORT`     | API bind port                | `8000`    |
 
 ## Testing
 
@@ -298,6 +303,7 @@ uv run pytest -n auto
 ### Initial Setup
 
 1. **Rename the package**: Replace `project_name` with your actual project name
+
    ```bash
    # Rename directory
    mv src/project_name src/your_project
@@ -307,6 +313,7 @@ uv run pytest -n auto
    ```
 
 2. **Update metadata** in `pyproject.toml`:
+
    - Project name, description, authors
    - Repository URLs
    - License if not MIT
@@ -320,17 +327,20 @@ uv run pytest -n auto
 The recommended workflow for new features:
 
 1. **Write a PRD first** — Use `/new-prd` or copy `prd/PRD_TEMPLATE.md`
+
    ```bash
    # In Claude Code
    /new-prd 04 "User Authentication"
    ```
 
 2. **Let Claude implement** — Reference the PRD in your prompt
+
    ```
    Implement the user authentication feature described in prd/04_User_Authentication.md
    ```
 
 3. **Review with subagents** — Claude can self-review
+
    ```
    Review this implementation against the PRD requirements
    Run a security audit on the auth module
@@ -354,23 +364,25 @@ This boilerplate includes AI-assisted development workflows for Claude Code.
 
 ### Skills (Slash Commands)
 
-| Command | Description |
-|---------|-------------|
-| `/new-feature` | Scaffold a complete feature with routes, models, services, and tests |
-| `/new-prd` | Create a PRD document from template |
+| Command          | Description                                                             |
+| ---------------- | ----------------------------------------------------------------------- |
+| `/new-feature`   | Scaffold a complete feature with routes, models, services, and tests    |
+| `/new-prd`       | Create a PRD document from template                                     |
 | `/security-scan` | Run comprehensive security analysis (bandit, pip-audit, detect-secrets) |
-| `/db-migrate` | Safe database migration workflow with safety checks |
-| `/test` | Run tests with coverage and quality gates |
-| `/lint` | Run ruff and mypy checks with auto-fix options |
-| `/review` | Code review against PRD standards |
+| `/db-migrate`    | Safe database migration workflow with safety checks                     |
+| `/test`          | Run tests with coverage and quality gates                               |
+| `/lint`          | Run ruff and mypy checks with auto-fix options                          |
+| `/review`        | Code review against PRD standards                                       |
 
 ### Hooks
 
 **Pre-tool hooks** run before Claude takes actions:
+
 - **sensitive-file-guard** - Blocks modifications to `.env`, secrets, credentials, and key files
 - **production-db-guard** - Warns before database migrations in production
 
 **Post-tool hooks** run after Claude completes actions:
+
 - **test-reminder** - Reminds to run tests after source file changes
 - **security-scan-reminder** - Reminds to scan after adding dependencies
 
@@ -378,12 +390,12 @@ This boilerplate includes AI-assisted development workflows for Claude Code.
 
 Specialized agents available for specific tasks:
 
-| Agent | Purpose |
-|-------|---------|
-| `code-reviewer` | Review code against project standards |
+| Agent              | Purpose                                        |
+| ------------------ | ---------------------------------------------- |
+| `code-reviewer`    | Review code against project standards          |
 | `security-auditor` | Perform security analysis against OWASP Top 10 |
-| `test-generator` | Generate pytest tests with 100% coverage goal |
-| `prd-compliance` | Check implementations against PRD requirements |
+| `test-generator`   | Generate pytest tests with 100% coverage goal  |
+| `prd-compliance`   | Check implementations against PRD requirements |
 
 ### Configuration
 
@@ -408,6 +420,7 @@ audit.security_alert(alert_type="brute_force", severity="high", details={...})
 ```
 
 Features:
+
 - **JSON structured output** - Machine-parseable logs for SIEM integration
 - **Correlation IDs** - Track requests across services
 - **Sensitive data masking** - Automatic redaction of passwords, tokens, keys
