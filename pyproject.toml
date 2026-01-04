@@ -70,10 +70,10 @@ metrics = [
 app = "project_name.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/core-industries/core-python-template"
-Documentation = "https://github.com/core-industries/core-python-template#readme"
-Repository = "https://github.com/core-industries/core-python-template"
-Issues = "https://github.com/core-industries/core-python-template/issues"
+Homepage = "https://github.com/coreindustries/core-python-template"
+Documentation = "https://github.com/coreindustries/core-python-template#readme"
+Repository = "https://github.com/coreindustries/core-python-template"
+Issues = "https://github.com/coreindustries/core-python-template/issues"
 
 # =============================================================================
 # Build System

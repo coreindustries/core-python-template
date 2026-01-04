@@ -6,7 +6,7 @@ Thank you for your interest in contributing! This document outlines the process 
 
 ```bash
 # Clone the repository
-git clone https://github.com/core-industries/core-python-template.git
+git clone https://github.com/coreindustries/core-python-template.git
 cd core-python-template
 
 # Install dependencies (requires uv)
