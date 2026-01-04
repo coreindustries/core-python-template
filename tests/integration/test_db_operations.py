@@ -40,13 +40,13 @@ async def test_embedding_crud_operations(db: Prisma) -> None:
 
     assert embedding.id is not None
     assert embedding.content == "Test content for integration testing"
-    assert json.loads(embedding.metadata) == metadata_dict  # type: ignore[arg-type]
+    assert embedding.metadata == metadata_dict
 
     # Read
     found = await db.embedding.find_unique(where={"id": embedding.id})
     assert found is not None
     assert found.content == embedding.content
-    assert json.loads(found.metadata) == metadata_dict  # type: ignore[arg-type]
+    assert found.metadata == metadata_dict
 
     # Update
     updated = await db.embedding.update(
@@ -92,7 +92,7 @@ async def test_embedding_metadata_json(db: Prisma) -> None:
         # Verify metadata preserved
         found = await db.embedding.find_unique(where={"id": embedding.id})
         assert found is not None
-        assert json.loads(found.metadata) == metadata  # type: ignore[arg-type]
+        assert found.metadata == metadata
 
     finally:
         # Cleanup
@@ -110,7 +110,6 @@ async def test_embedding_null_metadata(db: Prisma) -> None:
     embedding = await db.embedding.create(
         data={
             "content": "Content without metadata",
-            "metadata": None,
         }
     )
 
