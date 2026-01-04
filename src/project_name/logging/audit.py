@@ -314,8 +314,7 @@ class AuditLogger:
                 resource_type=resource_type,
                 resource_id=resource_id,
                 details=(
-                    f"Data {action.value.split('.')[-1]}: "
-                    f"{resource_type}/{resource_id}"
+                    f"Data {action.value.split('.')[-1]}: {resource_type}/{resource_id}"
                 ),
                 metadata=metadata,
             )

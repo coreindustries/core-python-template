@@ -26,13 +26,12 @@ class TestMetricsCollector:
 
     def test_initialize_creates_metrics(self) -> None:
         """Test that _initialize creates all metrics."""
-        with patch("prometheus_client.Counter") as mock_counter, patch(
-            "prometheus_client.Histogram"
-        ) as mock_histogram, patch(
-            "prometheus_client.Gauge"
-        ) as mock_gauge, patch(
-            "prometheus_client.Info"
-        ) as mock_info:
+        with (
+            patch("prometheus_client.Counter") as mock_counter,
+            patch("prometheus_client.Histogram") as mock_histogram,
+            patch("prometheus_client.Gauge") as mock_gauge,
+            patch("prometheus_client.Info") as mock_info,
+        ):
             collector = MetricsCollector(prefix="test")
             # Reset initialization state to allow re-init
             collector._initialized = False
@@ -47,9 +46,12 @@ class TestMetricsCollector:
 
     def test_initialize_only_once(self) -> None:
         """Test that _initialize only runs once."""
-        with patch("prometheus_client.Counter") as mock_counter, patch(
-            "prometheus_client.Histogram"
-        ), patch("prometheus_client.Gauge"), patch("prometheus_client.Info"):
+        with (
+            patch("prometheus_client.Counter") as mock_counter,
+            patch("prometheus_client.Histogram"),
+            patch("prometheus_client.Gauge"),
+            patch("prometheus_client.Info"),
+        ):
             collector = MetricsCollector()
             # Reset initialization state
             collector._initialized = False
@@ -201,9 +203,7 @@ class TestGetMetricsCollector:
         # Reset global
         collector_module._collector = None
 
-        with patch(
-            "project_name.metrics.config.get_metrics_settings"
-        ) as mock_settings:
+        with patch("project_name.metrics.config.get_metrics_settings") as mock_settings:
             mock_settings.return_value = MagicMock(prefix="test")
 
             collector1 = get_metrics_collector()
