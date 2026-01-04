@@ -1,292 +1,336 @@
-# Claude Code Instructions
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
 
-This is a **Python-focused boilerplate** for building production-ready applications with:
+This is a **Python template** for building production-ready applications with AI-assisted development in mind. The template is designed to work optimally with Cursor and Claude Code through PRD-driven development, custom skills, hooks, and enforced code standards.
 
-- **FastAPI** for REST APIs
-- **Typer** for CLI tools
-- **Prisma** (prisma-client-py) for database access
-- **PostgreSQL** for database access
-- **Redis** for caching (optional)
+**Core stack:** FastAPI (APIs) + Typer (CLI) + Prisma (ORM) + PostgreSQL + Python 3.13+
 
-## Tech Stack
+## Critical: Package Management
 
-| Component | Technology |
-|-----------|------------|
-| Language | Python 3.12+ |
-| Package Manager | uv (ALWAYS use uv, never pip) |
-| API Framework | FastAPI |
-| CLI Framework | Typer |
-| Database | PostgreSQL |
-| ORM | Prisma (prisma-client-py) |
-| Validation | Pydantic |
-| Testing | pytest, pytest-asyncio, pytest-cov |
-| Linting | ruff (replaces black, flake8, isort) |
-| Type Checking | mypy (strict mode) |
-| Security | bandit, pip-audit |
-| Containers | Docker, docker-compose |
-
-## Critical Rules
-
-### Package Management
+**ALWAYS use `uv` - NEVER use `pip` or bare `python` commands:**
 
 ```bash
-# ALWAYS use uv
+# Correct
 uv sync                    # Install dependencies
-uv add package-name        # Add dependency
+uv add package-name        # Add new package
 uv run python script.py    # Run Python
 uv run pytest              # Run tests
+uv run app serve           # Start API server
 
-# NEVER do this
-pip install x              # NO!
-python script.py           # NO - use uv run
+# INCORRECT - will break environment
+pip install x              # NO
+python script.py           # NO
 ```
 
-### Code Standards
+## Architecture
 
-1. **Type hints required** on ALL functions and class attributes
-2. **Docstrings required** on all public functions/classes (Google style)
-3. **100% test coverage** required
-4. **ruff** for linting and formatting
-5. **mypy strict mode** for type checking
+### Application Initialization Flow
 
-### File Organization
+1. **`main.py`** - FastAPI app with lifespan manager
+   - Logging configured FIRST (before any imports that use logging)
+   - Database client initialized on startup via `lifespan()` context manager
+   - Middleware stack: Request Logging → Prometheus Metrics → CORS
+   - Global instances: `_db` (database), audit logger, metrics collector
+
+2. **Database Access Pattern**
+   - **Global singleton**: `_db` in `src/project_name/db/__init__.py`
+   - **Connection managed via**: `get_db_client()` (startup) and `close_db_client()` (shutdown)
+   - **In routes/services**: Use `get_db()` context manager for queries
+   ```python
+   async with get_db() as db:
+       user = await db.user.find_unique(where={"id": user_id})
+   ```
+   - Prisma client is generated code (not in version control) - always run `uv run prisma generate` after schema changes
+
+3. **Configuration System**
+   - **Single source**: `src/project_name/config.py` using `pydantic-settings`
+   - Environment variables loaded from `.env` (not committed)
+   - Global `settings` singleton created at module import time
+   - Settings are immutable after initialization
+
+4. **Logging Architecture**
+   - **Two separate loggers**:
+     - Application logger: `get_logger(__name__)` for general logs
+     - Audit logger: `get_audit_logger()` for security events
+   - Configured in `logging/config.py` with forensic requirements:
+     - Correlation IDs for request tracing
+     - Automatic sensitive data masking (passwords, tokens, etc.)
+     - JSON structured output for production
+   - Middleware injects correlation ID into all requests
+
+5. **Metrics Collection**
+   - **Prometheus format** via `metrics/collector.py`
+   - Global singleton: `get_metrics_collector()`
+   - Middleware automatically records: request count, latency, in-progress requests
+   - Custom metrics via `collector.record_request()` and `collector.record_ai_request()`
+   - Exposed at `/metrics` endpoint
+
+### Directory Structure Logic
 
 ```
-src/project_name/       # Source code
-├── main.py             # FastAPI app
-├── cli.py              # Typer CLI
-├── config.py           # Settings (pydantic-settings)
-├── api/                # API routes
-├── models/             # Pydantic models
-├── services/           # Business logic
-├── db/                 # Database utilities
-└── utils/              # Helpers
-tests/                  # Test files
-├── unit/               # Unit tests
-└── integration/        # Integration tests
-scripts/                # Utility scripts
-prisma/                 # Prisma schema
-prd/                    # Product Requirements Documents
+src/project_name/
+├── main.py              # FastAPI app + lifespan
+├── cli.py               # Typer CLI (entry point: `uv run app`)
+├── config.py            # Settings (loaded from .env)
+├── api/
+│   ├── routes.py        # Main API routes
+│   └── metrics.py       # /metrics endpoint
+├── models/              # Pydantic models (request/response)
+├── services/            # Business logic (NOT API handlers)
+├── db/                  # Database connection utilities
+├── logging/             # Forensic logging system (6 modules)
+│   ├── config.py        # Logger configuration
+│   ├── audit.py         # Security event logging
+│   ├── middleware.py    # Request logging middleware
+│   ├── context.py       # Correlation ID context
+│   └── formatters.py    # JSON/text formatters
+└── metrics/             # Prometheus metrics (3 modules)
+    ├── collector.py     # Metric definitions
+    ├── middleware.py    # Auto-instrumentation
+    └── config.py        # Metrics settings
+
+tests/
+├── unit/                # Fast tests, no I/O
+└── integration/         # Tests with database
+    └── conftest.py      # Fixtures for db + HTTP client
 ```
 
-### Environment Variables
+**Key patterns:**
+- **Routes** (`api/`) handle HTTP, delegate to **services** for logic
+- **Services** contain business logic, use `get_db()` for data access
+- **Models** define request/response shapes (Pydantic), NOT database models
+- **Database schema** is in `prisma/schema.prisma` (Prisma models, not Python)
 
-- Use `pydantic-settings` for configuration
-- Store in `.env` file (never commit)
-- Document in `.env.example`
-- Load once at startup via `config.py`
+## Common Commands
 
-### Database
+### Development Workflow
+```bash
+# Setup (first time)
+uv sync
+cp .env.example .env
+docker-compose up -d postgres redis
+uv run prisma generate
+uv run prisma db push  # Or: uv run prisma migrate deploy
 
-- Prisma schema is source of truth: `prisma/schema.prisma`
-- Generate client: `uv run prisma generate`
-- Run migrations: `uv run prisma migrate deploy`
-- Use async client from `project_name.db`
+# Daily development
+uv run app serve --reload         # Start API at http://localhost:8000
+uv run app info                   # Show current config
+docker-compose up -d postgres redis  # Start dependencies
+
+# Before committing
+uv run ruff check --fix src/ tests/
+uv run ruff format src/ tests/
+uv run mypy src/
+uv run pytest --cov=src --cov-fail-under=66
+```
 
 ### Testing
-
 ```bash
-# Run all tests
-uv run pytest
-
-# With coverage
-uv run pytest --cov=src --cov-report=term-missing
-
-# Specific test
-uv run pytest tests/unit/test_config.py -v
+uv run pytest                     # All tests
+uv run pytest tests/unit          # Unit tests only
+uv run pytest tests/integration   # Integration tests only
+uv run pytest tests/unit/test_config.py::test_settings_load -v  # Single test
+uv run pytest -x                  # Stop on first failure
+uv run pytest --cov=src --cov-report=term-missing  # With coverage
+uv run pytest -m "not slow"       # Skip slow tests
 ```
 
-### Docker
-
+### Database
 ```bash
-# Start services (Postgres, Redis)
-docker-compose up -d postgres redis
-
-# Run app in container
-docker-compose up app
-
-# Full stack
-docker-compose up
+uv run prisma generate            # Generate Python client (after schema changes)
+uv run prisma migrate dev --name add_users  # Create migration
+uv run prisma migrate deploy      # Apply migrations (production)
+uv run prisma db push             # Push schema without migration (dev only)
+uv run prisma studio              # Open database GUI
 ```
 
-## PRD-Driven Development
-
-All features must follow PRDs in the `prd/` directory:
-
-- `prd/01_Technical_standards.md` - Code standards and best practices
-- `prd/02_Tech_stack.md` - Technology stack details
-- `prd/03_Security.md` - Security requirements
-- `prd/PRD_TEMPLATE.md` - Template for new PRDs
-
-## Common Patterns
-
-### FastAPI Route
-
-```python
-from fastapi import APIRouter, HTTPException, status
-from project_name.models import UserCreate, User
-from project_name.services import UserService
-
-router = APIRouter(prefix="/users", tags=["users"])
-
-@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
-async def create_user(data: UserCreate) -> User:
-    """Create a new user."""
-    service = UserService()
-    return await service.create(data)
+### Code Quality
+```bash
+uv run ruff check src/ tests/     # Lint
+uv run ruff check --fix src/      # Auto-fix linting issues
+uv run ruff format src/           # Format code
+uv run mypy src/                  # Type check
+uv run bandit -r src/             # Security scan
 ```
 
-### Pydantic Model
+## Code Standards (Enforced)
 
+1. **Type hints required** on all functions, class attributes, return types
+2. **Google-style docstrings** required on all public functions/classes
+3. **66% test coverage** minimum (configured in `pyproject.toml`)
+4. **mypy strict mode** - no `Any` types without justification
+5. **Modern Python syntax**: `str | None` not `Optional[str]`, `list[str]` not `List[str]`
+
+### Example: Proper Function Definition
 ```python
-from pydantic import BaseModel, EmailStr, Field
+async def get_user(user_id: str, include_deleted: bool = False) -> User | None:
+    """Retrieve a user by ID.
 
-class UserCreate(BaseModel):
-    email: EmailStr
-    name: str = Field(min_length=1, max_length=100)
-```
+    Args:
+        user_id: Unique identifier for the user.
+        include_deleted: Whether to include soft-deleted users.
 
-### Database Query
+    Returns:
+        User object if found, None otherwise.
 
-```python
-from project_name.db import get_db
-
-async def get_user(user_id: str) -> User | None:
+    Raises:
+        ValidationError: If user_id format is invalid.
+    """
     async with get_db() as db:
         return await db.user.find_unique(where={"id": user_id})
 ```
 
-### CLI Command
+## PRD-Driven Development
 
+All features should reference PRDs in `prd/` directory:
+
+- **`prd/01_Technical_standards.md`** - Code quality requirements (DRY, typing, naming)
+- **`prd/02_Tech_stack.md`** - Technology decisions and justifications
+- **`prd/03_Security.md`** - Security requirements (OWASP Top 10, secrets, audit logging)
+- **`prd/PRD_TEMPLATE.md`** - Template for new feature PRDs
+
+When implementing features:
+1. Read relevant PRDs first
+2. Follow patterns in PRD 01 (Technical Standards)
+3. Use security patterns from PRD 03
+4. Create new PRD for significant features
+
+## Prisma ORM Patterns
+
+### Schema Definition (`prisma/schema.prisma`)
+- Source of truth for database structure
+- **After changing schema**: `uv run prisma generate` (regenerates Python client)
+- **JSON fields**: Prisma requires JSON strings, not dicts:
+  ```python
+  # Correct
+  await db.embedding.create(data={
+      "content": "text",
+      "metadata": json.dumps({"key": "value"})  # String
+  })
+
+  # Reading returns dict directly
+  found = await db.embedding.find_unique(where={"id": id})
+  found.metadata  # Already a dict
+  ```
+
+### Vector Column Pattern (pgvector)
+- Vector columns added via raw SQL migration (in `prisma/migrations/add_vector_column.sql`)
+- Prisma doesn't support vector type natively
+- Access via raw queries: `await db.query_raw(...)`
+
+## Testing Patterns
+
+### Unit Tests (`tests/unit/`)
+- No database, no network I/O
+- Mock external dependencies
+- Fast execution (< 1s total)
+
+### Integration Tests (`tests/integration/`)
+- Use real PostgreSQL (from `docker-compose`)
+- Fixtures in `conftest.py`:
+  - `db`: Connected Prisma client
+  - `integration_client`: AsyncClient for API tests
+- Database setup: `uv run prisma db push` before running tests
+- Cleanup: Tests should clean up created data (or use transactions)
+
+### Example: Integration Test
 ```python
-import typer
-from rich import print
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_create_user(db: Prisma) -> None:
+    """Test user creation."""
+    user = await db.user.create(data={"email": "test@example.com"})
+    assert user.id is not None
 
-app = typer.Typer()
-
-@app.command()
-def greet(name: str) -> None:
-    """Greet someone."""
-    print(f"[green]Hello, {name}![/green]")
+    # Cleanup
+    await db.user.delete(where={"id": user.id})
 ```
 
-## When Making Changes
+## CLI Entry Point
 
-1. **Read existing code first** - Understand patterns before modifying
-2. **Follow existing conventions** - Match the codebase style
-3. **Write tests** - 100% coverage required
-4. **Run checks** before committing:
-   ```bash
-   uv run ruff check src/ tests/
-   uv run ruff format src/ tests/
-   uv run mypy src/
-   uv run pytest
-   ```
-5. **Update documentation** if adding new patterns
-
-## Useful Commands
+The CLI is defined in `src/project_name/cli.py` and exposed as `app` command:
 
 ```bash
-# Development
-uv sync                              # Install deps
-uv run app serve                     # Start API server
-uv run app info                      # Show config
-docker-compose up -d postgres redis  # Start services
-
-# Quality
-uv run ruff check --fix src/         # Lint and fix
-uv run ruff format src/              # Format
-uv run mypy src/                     # Type check
-uv run bandit -r src/                # Security scan
-
-# Database
-uv run prisma generate               # Generate client
-uv run prisma migrate dev            # Create migration
-uv run prisma migrate deploy         # Apply migrations
-
-# Testing
-uv run pytest                        # Run tests
-uv run pytest -x                     # Stop on first failure
-uv run pytest --cov=src              # With coverage
+uv run app --help          # Show all commands
+uv run app serve           # Start FastAPI server
+uv run app serve --reload  # With auto-reload
+uv run app info            # Show configuration
 ```
 
-## Skills (Slash Commands)
+**To add new CLI commands**: Add functions to `cli.py` with `@app.command()` decorator.
 
-This project includes custom skills for common workflows:
+## Environment Variables
 
-| Skill | Description | Usage |
-|-------|-------------|-------|
-| `/new-feature` | Scaffold a new feature with routes, models, services, tests | `/new-feature user_profile --with-db` |
-| `/new-prd` | Create a new PRD from template | `/new-prd 04 "User Authentication"` |
-| `/security-scan` | Run comprehensive security analysis | `/security-scan --fix` |
-| `/db-migrate` | Manage Prisma migrations | `/db-migrate create --name add_users` |
-| `/test` | Run tests with coverage | `/test --coverage` |
-| `/lint` | Run linting and type checking | `/lint --fix` |
-| `/review` | Review code against standards | `/review --security` |
+Required variables (in `.env`):
+- `DATABASE_URL` - PostgreSQL connection string
+- `REDIS_URL` - Redis connection (optional)
+- `LOG_LEVEL` - DEBUG, INFO, WARNING, ERROR, CRITICAL
+- `ENVIRONMENT` - development, staging, production
 
-### Skill Details
-
-**`/new-feature <name> [--with-db] [--crud]`**
-- Creates: `api/{name}.py`, `models/{name}.py`, `services/{name}.py`, `tests/unit/test_{name}.py`
-- Adds Prisma model if `--with-db`
-- Registers router automatically
-
-**`/security-scan [--fix] [--ci]`**
-- Runs: bandit, pip-audit, ruff security rules, detect-secrets
-- Generates security report with severity ratings
-- CI mode outputs JSON for pipeline integration
-
-**`/review [target] [--prd <num>] [--security]`**
-- Checks against PRD 01 standards
-- Reports: type coverage, docstrings, naming, tests
-- Security focus checks OWASP Top 10
-
-## Hooks
-
-Automated hooks for quality and security:
-
-| Hook | Trigger | Action |
-|------|---------|--------|
-| Sensitive file guard | Edit/Write to .env, secrets | Blocks modification |
-| Test reminder | Edit src/**/*.py | Reminds to run tests |
-| Security scan reminder | uv add | Suggests security scan |
-| Production DB guard | prisma migrate in prod | Requires confirmation |
-
-## Subagents
-
-Available task agents for complex operations:
-
-| Agent | Use Case | Invoke With |
-|-------|----------|-------------|
-| `code-reviewer` | Review changes against standards | Task tool |
-| `security-auditor` | Deep security analysis | Task tool |
-| `test-generator` | Generate tests for new code | Task tool |
-| `prd-compliance` | Check PRD requirements | Task tool |
+See `.env.example` for full list and defaults.
 
 ## Forensic Security Logging
 
-All operations are logged for audit:
+All security-relevant events must be logged via audit logger:
 
 ```python
-from project_name.logging import get_audit_logger, AuditAction
+from project_name.logging import get_audit_logger, AuditAction, SecurityEvent
 
 audit = get_audit_logger()
 
-# Log authentication
+# Authentication events
 audit.auth_success(user_id="123", ip_address="1.2.3.4")
 audit.auth_failure(identifier="user@example.com", reason="invalid_password")
 
-# Log data access
+# Data access
 audit.data_access(user_id="123", resource_type="user", action=AuditAction.DATA_READ)
 
-# Log security events
+# Security alerts
 audit.security_alert(alert_type="brute_force", ip_address="1.2.3.4")
 ```
 
 Logs include:
-- Correlation IDs for request tracing
-- Automatic sensitive data masking
-- JSON structured output for log aggregation
-- Separate audit.log for security events
+- Correlation IDs (automatic, per-request)
+- Sensitive data masking (automatic for passwords, tokens, API keys)
+- Structured JSON format for aggregation
+- Separate audit log file for compliance
+
+## Docker & Observability
+
+```bash
+# Minimal setup (just databases)
+docker-compose up -d postgres redis
+
+# Full observability stack
+docker-compose up -d  # Includes Prometheus, Grafana, Loki, Jaeger
+
+# Access services
+# - API: http://localhost:8000
+# - Grafana: http://localhost:3000 (admin/admin)
+# - Prometheus: http://localhost:9090
+# - Jaeger: http://localhost:16686
+```
+
+Observability config in `observability/` directory - see `observability/README.md` for details.
+
+## Common Gotchas
+
+1. **Always run `uv run prisma generate` after changing schema** - the Python client is generated code
+2. **JSON fields in Prisma require `json.dumps()`** when writing, but return dicts when reading
+3. **Database client is a singleton** - don't create new `Prisma()` instances, use `get_db()`
+4. **Logging must be configured before other imports** - `configure_logging()` called at top of `main.py`
+5. **Test markers**: Use `@pytest.mark.integration` for tests requiring database
+6. **Coverage set to 66%** - this is intentional, template has example code not fully tested
+
+## When Renaming This Template
+
+Search and replace `project_name` with your actual project name in:
+- `pyproject.toml` (`[project]` section and `[project.scripts]`)
+- All imports in `src/` and `tests/`
+- `docker-compose.yml` (service names)
+- Rename `src/project_name/` directory
+
+Then: `uv sync` to regenerate lockfile.
