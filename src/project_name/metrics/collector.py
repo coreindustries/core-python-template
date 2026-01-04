@@ -234,13 +234,13 @@ class MetricsCollector:
         if prompt_tokens > 0:
             self.ai_token_usage.labels(
                 model=model,
-                token_type="prompt",  # nosec B106  # Not a password, token type label
+                token_type="prompt",  # noqa: S106  # nosec B106  # Not a password, token type label
             ).inc(prompt_tokens)
 
         if completion_tokens > 0:
             self.ai_token_usage.labels(
                 model=model,
-                token_type="completion",  # nosec B106  # Not a password, token type label
+                token_type="completion",  # noqa: S106  # nosec B106  # Not a password, token type label
             ).inc(completion_tokens)
 
 
