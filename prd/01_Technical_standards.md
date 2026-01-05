@@ -76,14 +76,14 @@ def first_or_none(items: list[T]) -> T | None:
 
 **REQUIRED:** All code MUST follow these naming conventions.
 
-| Element | Convention | Example |
-|---------|------------|---------|
-| Functions/variables | `snake_case` | `process_data`, `user_count` |
-| Classes | `PascalCase` | `DataProcessor`, `UserService` |
-| Constants | `UPPER_SNAKE_CASE` | `MAX_RETRY_COUNT`, `DEFAULT_TIMEOUT` |
-| Private members | `_prefix` | `_internal_state`, `_validate()` |
-| Modules | `snake_case` | `data_utils.py`, `user_service.py` |
-| Type aliases | `PascalCase` | `UserId = str`, `ConfigDict = dict[str, Any]` |
+| Element             | Convention         | Example                                       |
+| ------------------- | ------------------ | --------------------------------------------- |
+| Functions/variables | `snake_case`       | `process_data`, `user_count`                  |
+| Classes             | `PascalCase`       | `DataProcessor`, `UserService`                |
+| Constants           | `UPPER_SNAKE_CASE` | `MAX_RETRY_COUNT`, `DEFAULT_TIMEOUT`          |
+| Private members     | `_prefix`          | `_internal_state`, `_validate()`              |
+| Modules             | `snake_case`       | `data_utils.py`, `user_service.py`            |
+| Type aliases        | `PascalCase`       | `UserId = str`, `ConfigDict = dict[str, Any]` |
 
 ```python
 MAX_RETRY_COUNT = 3
@@ -159,12 +159,14 @@ def validate_email(email: str) -> bool:
 **REQUIRED:** The project root MUST be kept clean.
 
 **Allowed in root:**
+
 - Configuration: `pyproject.toml`, `docker-compose.yml`, `.gitignore`
 - Documentation: `README.md`, `LICENSE`, `CONTRIBUTING.md`
 - CI/CD: `.github/workflows/`
 - Environment: `.env.example`
 
 **Must be in subdirectories:**
+
 - Source code → `src/`
 - Tests → `tests/`
 - Scripts → `scripts/`
@@ -212,12 +214,14 @@ project-root/
 - Use `pytest-asyncio` for async tests
 
 **Coverage thresholds:**
+
 - Statements: 100%
 - Branches: 100%
 - Functions: 100%
 - Lines: 100%
 
 **Test file naming:**
+
 - Co-located: `test_<module>.py` next to source
 - Separate: `tests/unit/test_<module>.py`
 
@@ -282,6 +286,7 @@ async def test_create_user_endpoint() -> None:
 **REQUIRED:** All code MUST pass linting before commits.
 
 **Tools:**
+
 - `ruff` - Linting and formatting (replaces flake8, black, isort)
 - `mypy` - Static type checking
 
@@ -316,10 +321,12 @@ warn_unused_ignores = true
 **REQUIRED:** Security checks before commits.
 
 **Tools:**
+
 - `bandit` - Static security analysis
 - `safety` or `pip-audit` - Dependency vulnerability scanning
 
 **Checks:**
+
 - No hardcoded secrets
 - No SQL injection vulnerabilities
 - No command injection
@@ -545,7 +552,195 @@ class Settings(BaseSettings):
 settings = Settings()
 ```
 
-## 10. References
+## 10. PRD Implementation Workflow
+
+### 10.1 Overview
+
+This section defines the standard workflow for implementing features defined in PRDs. Following this workflow ensures code quality, catches issues early, and minimizes pre-commit hook failures.
+
+### 10.2 Before Starting Implementation
+
+**Read the PRD thoroughly:**
+
+1. Review the PRD document for the feature you're implementing
+2. Understand dependencies on other PRDs (check "Dependencies" section)
+3. Review related PRDs for context and consistency
+4. Check PRD-01 (Technical Standards) for coding requirements
+5. Check PRD-03 (Security) for security requirements
+
+**Setup your development environment:**
+
+```bash
+# Ensure dependencies are up to date
+uv sync
+
+# Start required services
+docker-compose up -d postgres redis
+
+# Generate Prisma client if schema changed
+uv run prisma generate
+uv run prisma db push
+```
+
+### 10.3 During Development (REQUIRED)
+
+**Run quality checks FREQUENTLY during development** (not just before committing):
+
+```bash
+# After writing/modifying a file or function
+uv run ruff check src/ tests/          # Check for linting errors
+uv run ruff check --fix src/ tests/    # Auto-fix issues
+uv run ruff format src/ tests/         # Format code
+
+# After writing type hints or complex logic
+uv run mypy src/                       # Type check (strict mode)
+
+# After writing tests
+uv run pytest tests/unit/test_<module>.py -v  # Run specific test file
+uv run pytest --cov=src --cov-fail-under=66   # Check coverage
+```
+
+**Best Practice: Run checks every 15-30 minutes during active development**
+
+- Prevents accumulation of errors
+- Provides immediate feedback
+- Makes debugging easier (smaller change sets)
+- Reduces pre-commit hook failure frustration
+
+**Integration with your editor:**
+
+- Configure VS Code / PyCharm to run ruff and mypy on save
+- Enable type hints inline display
+- Use pytest extensions for test running
+
+### 10.4 Before Each Commit
+
+**REQUIRED: Run the full quality check suite:**
+
+```bash
+# 1. Lint and format
+uv run ruff check --fix src/ tests/
+uv run ruff format src/ tests/
+
+# 2. Type check
+uv run mypy src/
+
+# 3. Security scan
+uv run bandit -r src/
+
+# 4. Run tests with coverage
+uv run pytest --cov=src --cov-fail-under=66
+
+# 5. Verify changes
+git status
+git diff
+```
+
+**All checks MUST pass before committing.**
+
+If any check fails:
+
+1. Fix the issues immediately
+2. Re-run the checks
+3. Only commit when all checks pass
+
+**Commit Message Format:**
+
+```bash
+git commit -m "<type>: <description>
+
+<body (optional)>
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+```
+
+Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
+
+### 10.5 Before Creating Pull Request
+
+**Final verification:**
+
+```bash
+# 1. Ensure you're up to date with main
+git fetch origin
+git rebase origin/main
+
+# 2. Run full test suite
+uv run pytest
+
+# 3. Verify coverage hasn't decreased
+uv run pytest --cov=src --cov-report=term-missing
+
+# 4. Check for merge conflicts
+git status
+
+# 5. Review your changes
+git log origin/main..HEAD
+git diff origin/main
+```
+
+**Pull Request Checklist:**
+
+- [ ] All tests pass
+- [ ] Coverage is maintained or improved (≥66%)
+- [ ] Ruff linting passes
+- [ ] Mypy type checking passes
+- [ ] Bandit security scan passes
+- [ ] Code follows DRY principle
+- [ ] All functions have type hints
+- [ ] All public functions have docstrings
+- [ ] No hardcoded secrets
+- [ ] Updated relevant documentation
+- [ ] PRD reference in PR description
+
+### 10.6 Common Issues and Solutions
+
+**Mypy errors with Pydantic models:**
+
+- Use `# type: ignore[call-arg]` for Pydantic inheritance issues
+- Add mypy overrides in `pyproject.toml` for complex model files
+
+**Ruff unused argument errors:**
+
+- Prefix with underscore: `_unused_param`
+- Use `# noqa: ARG002` for intentionally unused parameters
+
+**Import errors:**
+
+- Install missing type stubs: `uv add --dev types-<package>`
+- Add `# type: ignore[import-untyped]` for packages without stubs
+
+**Test failures:**
+
+- Run with `-v` for verbose output: `uv run pytest -v`
+- Run single test: `uv run pytest tests/unit/test_file.py::test_name -v`
+- Check fixtures in `conftest.py`
+
+### 10.7 Time Estimates
+
+**Per feature implementation:**
+
+- Small feature (1-3 files): 2-4 hours development + 1 hour quality checks
+- Medium feature (4-10 files): 1-2 days development + 2 hours quality checks
+- Large feature (10+ files): 3-5 days development + 4 hours quality checks
+
+**Quality check time breakdown:**
+
+- Ruff linting: 5-10 seconds
+- Mypy type checking: 10-30 seconds
+- Bandit security scan: 5-10 seconds
+- Full test suite: 1-5 minutes
+- Coverage report: 10-30 seconds
+
+**Running checks during development saves time:**
+
+- Finding errors early: -50% debugging time
+- Smaller change sets: -30% fix time
+- Fewer pre-commit failures: -40% commit frustration
+
+## 11. References
 
 - `02_Tech_stack.md` - Technology stack details
 - `03_Security.md` - Security requirements
