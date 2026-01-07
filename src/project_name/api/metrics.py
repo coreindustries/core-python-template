@@ -25,7 +25,7 @@ async def metrics() -> Response:
         Prometheus metrics in text/plain format.
     """
     try:
-        from prometheus_client import (
+        from prometheus_client import (  # noqa: PLC0415
             CONTENT_TYPE_LATEST,
             generate_latest,
         )
