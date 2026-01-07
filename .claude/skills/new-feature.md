@@ -5,7 +5,7 @@ Scaffold a new feature with routes, models, services, and tests following projec
 ## Usage
 
 ```
-/new-feature <feature_name> [--with-db] [--crud]
+/new-feature <feature_name> [--with-db] [--crud] [--prd <prd_number>]
 ```
 
 ## Arguments
@@ -13,6 +13,7 @@ Scaffold a new feature with routes, models, services, and tests following projec
 - `feature_name`: Name of the feature in snake_case (e.g., `user_profile`, `payment`)
 - `--with-db`: Include Prisma model scaffold
 - `--crud`: Generate full CRUD operations
+- `--prd <prd_number>`: Link to PRD number (branches from the PRD branch)
 
 ## Instructions
 
@@ -23,7 +24,15 @@ When this skill is invoked:
    - Must not conflict with existing features
    - Check `src/project_name/` for existing modules
 
-2. **Create the following files** (replace `{feature}` with the feature name):
+2. **Create or switch to the appropriate branch**:
+   - If `--prd` is specified:
+     - Branch from the PRD branch: `git checkout -b feat/{feature_name} prd/{prd_number}-*`
+     - Example: `git checkout -b feat/user_profile prd/04-user-authentication`
+   - If no PRD specified:
+     - Branch from `main`: `git checkout -b feat/{feature_name} main`
+   - This ensures features are developed in isolation and linked to their PRD
+
+3. **Create the following files** (replace `{feature}` with the feature name):
 
    ### API Route (`src/project_name/api/{feature}.py`)
    ```python
@@ -233,7 +242,7 @@ When this skill is invoked:
            assert data.name == "Test"
    ```
 
-3. **If `--with-db` is specified**, add to `prisma/schema.prisma`:
+4. **If `--with-db` is specified**, add to `prisma/schema.prisma`:
    ```prisma
    model {Feature} {
      id        String   @id @default(cuid())
@@ -245,28 +254,59 @@ When this skill is invoked:
    }
    ```
 
-4. **Register the router** in `src/project_name/api/routes.py`:
+5. **Register the router** in `src/project_name/api/routes.py`:
    ```python
    from project_name.api.{feature} import router as {feature}_router
    router.include_router({feature}_router)
    ```
 
-5. **After scaffolding**, remind the user to:
+6. **After scaffolding**, remind the user to:
    - Run `uv run prisma generate` if database model was added
    - Run `uv run prisma migrate dev --name add_{feature}` to create migration
    - Update the generated code with feature-specific fields
    - Run `uv run pytest tests/unit/test_{feature}.py` to verify
+   - Commit changes: `git add . && git commit -m "feat({feature}): scaffold {feature} feature"`
+   - Push the branch: `git push -u origin feat/{feature_name}`
+   - Create a PR targeting the PRD branch (if linked) or `main`
 
 ## Example
 
 ```
-/new-feature user_profile --with-db --crud
+/new-feature user_profile --with-db --crud --prd 04
 ```
 
 Creates:
+- Branch `feat/user_profile` from `prd/04-user-authentication`
 - `src/project_name/api/user_profile.py`
 - `src/project_name/models/user_profile.py`
 - `src/project_name/services/user_profile.py`
 - `tests/unit/test_user_profile.py`
 - Updates `prisma/schema.prisma`
 - Registers router in main routes
+
+## Branching Workflow
+
+```
+                    ┌─────────────────────────────────────────┐
+                    │      FEATURE BRANCHING WORKFLOW         │
+                    └─────────────────────────────────────────┘
+
+main ─────────────────────────────────────────────────────────────────►
+       │                                              ▲
+       │ create prd branch                            │ merge PRD PR
+       ▼                                              │
+prd/04-user-authentication ──────────────────────────►│
+       │                              ▲               │
+       │ create feature branch        │ merge feat PR │
+       ▼                              │               │
+feat/user_profile ───────────────────►│               │
+       │                              │               │
+       └── implement feature ─────────┘               │
+                                                      │
+```
+
+### Merge Strategy
+
+1. **Feature → PRD branch**: Feature PRs target their parent PRD branch
+2. **PRD → main**: Once all features are complete, PRD branch merges to main
+3. **Standalone features**: Features without a PRD target `main` directly

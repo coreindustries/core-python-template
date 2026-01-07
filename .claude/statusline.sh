@@ -21,7 +21,7 @@ RST() { if [ "$use_color" -eq 1 ]; then printf '\033[0m'; fi; }
 
 # ---- modern sleek colors ----
 dir_color() { if [ "$use_color" -eq 1 ]; then printf '\033[38;5;117m'; fi; }    # sky blue
-model_color() { if [ "$use_color" -eq 1 ]; then printf '\033[38;5;147m'; fi; }  # light purple  
+model_color() { if [ "$use_color" -eq 1 ]; then printf '\033[38;5;147m'; fi; }  # light purple
 version_color() { if [ "$use_color" -eq 1 ]; then printf '\033[38;5;180m'; fi; } # soft yellow
 cc_version_color() { if [ "$use_color" -eq 1 ]; then printf '\033[38;5;249m'; fi; } # light gray
 style_color() { if [ "$use_color" -eq 1 ]; then printf '\033[38;5;245m'; fi; } # gray
@@ -63,20 +63,20 @@ extract_json_string() {
   local json="$1"
   local key="$2"
   local default="${3:-}"
-  
+
   local field="${key##*.}"
   field="${field%% *}"
-  
+
   local value=$(echo "$json" | grep -o "\"${field}\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | head -1 | sed 's/.*:[[:space:]]*"\([^"]*\)".*/\1/')
-  
+
   if [ -n "$value" ]; then
     value=$(echo "$value" | sed 's/\\\\/\//g')
   fi
-  
+
   if [ -z "$value" ] || [ "$value" = "null" ]; then
     value=$(echo "$json" | grep -o "\"${field}\"[[:space:]]*:[[:space:]]*[0-9.]\+" | head -1 | sed 's/.*:[[:space:]]*\([0-9.]\+\).*/\1/')
   fi
-  
+
   if [ -n "$value" ] && [ "$value" != "null" ]; then
     echo "$value"
   else
@@ -88,10 +88,10 @@ extract_json_number() {
   local json="$1"
   local key="$2"
   local default="${3:-0}"
-  
+
   local field="${key##*.}"
   local value=$(echo "$json" | grep -o "\"${field}\"[[:space:]]*:[[:space:]]*[0-9.]\+" | head -1 | sed 's/.*:[[:space:]]*\([0-9.]\+\).*/\1/')
-  
+
   if [ -n "$value" ] && [ "$value" != "null" ]; then
     echo "$value"
   else
@@ -109,14 +109,14 @@ if [ "$HAS_JQ" -eq 1 ]; then
   output_style=$(echo "$input" | jq -r '.output_style.name // ""' 2>/dev/null)
 else
   current_dir=$(echo "$input" | grep -o '"workspace"[[:space:]]*:[[:space:]]*{[^}]*"current_dir"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"current_dir"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' | sed 's/\\\\/\//g')
-  
+
   if [ -z "$current_dir" ] || [ "$current_dir" = "null" ]; then
     current_dir=$(echo "$input" | grep -o '"cwd"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"cwd"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' | sed 's/\\\\/\//g')
   fi
-  
+
   [ -z "$current_dir" ] && current_dir="unknown"
   current_dir=$(echo "$current_dir" | sed "s|^$HOME|~|g")
-  
+
   model_name=$(echo "$input" | grep -o '"model"[[:space:]]*:[[:space:]]*{[^}]*"display_name"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"display_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
   [ -z "$model_name" ] && model_name="Claude"
   model_version=""

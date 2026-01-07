@@ -99,7 +99,7 @@ def serve(
 @app.command()
 def db_migrate() -> None:
     """Run database migrations."""
-    import subprocess  # noqa: PLC0415  # nosec B404  # CLI tool, safe subprocess usage
+    import subprocess  # noqa: PLC0415  # nosec B404  # CLI tool, lazy import
 
     rprint("[bold blue]Running database migrations...[/bold blue]")
     result = subprocess.run(  # nosec B603, B607  # shell=False is safe, command is hardcoded
@@ -119,7 +119,7 @@ def db_migrate() -> None:
 @app.command()
 def db_generate() -> None:
     """Generate Prisma client."""
-    import subprocess  # noqa: PLC0415  # nosec B404  # CLI tool, safe subprocess usage
+    import subprocess  # noqa: PLC0415  # nosec B404  # CLI tool, lazy import
 
     rprint("[bold blue]Generating Prisma client...[/bold blue]")
     result = subprocess.run(  # nosec B603, B607  # shell=False is safe, command is hardcoded
