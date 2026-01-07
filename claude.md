@@ -342,6 +342,56 @@ docker-compose up -d  # Includes Prometheus, Grafana, Loki, Jaeger
 
 Observability config in `observability/` directory - see `observability/README.md` for details.
 
+## Parallel Development with Worktrees
+
+Run multiple Claude Code or Cursor agents simultaneously using git worktrees. Each agent works on its own isolated branch without conflicts.
+
+### Quick Start
+
+```bash
+# Create worktrees for parallel tasks
+./scripts/worktree.sh create feature-auth main
+./scripts/worktree.sh create feature-api main
+
+# Open each in a separate terminal with Claude
+cd ../worktrees/feature-auth && claude
+cd ../worktrees/feature-api && claude
+
+# List all worktrees
+./scripts/worktree.sh list
+
+# Clean up when done
+./scripts/worktree.sh remove feature-auth
+./scripts/worktree.sh remove feature-api
+```
+
+### What the script does:
+
+1. Creates a new branch: `worktree/<name>`
+2. Creates worktree at: `../worktrees/<name>`
+3. **Copies `.env` file** from main repo (critical for database access)
+4. Copies local configs (`.claude/settings.local.json`, `.secrets.baseline`)
+5. Runs `uv sync` to install dependencies
+
+### Best practices:
+
+- **Use for independent features** - avoid worktrees for tasks modifying the same files
+- **3-5 agents is optimal** - more than that becomes hard to manage
+- **Each worktree shares the database** - modify `.env` in each for true isolation
+- **Run `uv run prisma generate`** in each worktree after creation
+
+### Directory structure after setup:
+
+```
+parent-directory/
+├── core-python-template/     # Main repo (you are here)
+└── worktrees/
+    ├── feature-auth/         # Worktree 1 (separate Claude session)
+    └── feature-api/          # Worktree 2 (separate Claude session)
+```
+
+See `/worktree` skill for Claude Code integration.
+
 ## Common Gotchas
 
 1. **Always run `uv run prisma generate` after changing schema** - the Python client is generated code
