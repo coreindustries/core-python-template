@@ -198,7 +198,7 @@ class TestGetMetricsCollector:
 
     def test_returns_singleton(self) -> None:
         """Test that function returns singleton."""
-        import project_name.metrics.collector as collector_module  # noqa: PLC0415
+        import project_name.metrics.collector as collector_module
 
         # Reset global
         collector_module._collector = None

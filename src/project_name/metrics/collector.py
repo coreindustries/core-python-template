@@ -47,7 +47,7 @@ class MetricsCollector:
             return
 
         try:
-            from prometheus_client import (  # noqa: PLC0415
+            from prometheus_client import (
                 Counter,
                 Gauge,
                 Histogram,
@@ -256,7 +256,7 @@ def get_metrics_collector() -> MetricsCollector:
     """
     global _collector  # noqa: PLW0603
     if _collector is None:
-        from project_name.metrics.config import get_metrics_settings  # noqa: PLC0415
+        from project_name.metrics.config import get_metrics_settings
 
         settings = get_metrics_settings()
         _collector = MetricsCollector(prefix=settings.prefix)

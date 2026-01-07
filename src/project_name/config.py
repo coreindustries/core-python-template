@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:3000"]
 
     # Security
-    secret_key: str = "change-me-in-production"  # noqa: S105  # Default only, must be overridden
+    secret_key: str = "change-me-in-production"  # Default only, must be overridden
 
     # Logging - Forensic Security Logging
     log_json: bool = True  # Use JSON structured logging (recommended for production)

@@ -103,7 +103,7 @@ def mock_ai_client(mock_ai_response: dict[str, Any]) -> MagicMock:
     Returns:
         Mock AI client.
     """
-    from project_name.ai.models import EmbeddingResponse, TokenUsage  # noqa: PLC0415
+    from project_name.ai.models import EmbeddingResponse, TokenUsage
 
     mock = MagicMock()
     mock.provider = "openai"

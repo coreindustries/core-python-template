@@ -16,7 +16,7 @@ CreateT = TypeVar("CreateT", bound=BaseModel)  # Create DTO type
 UpdateT = TypeVar("UpdateT", bound=BaseModel)  # Update DTO type
 
 
-class BaseService(ABC, Generic[T, CreateT, UpdateT]):  # noqa: UP046  # Keep Generic for clarity
+class BaseService(ABC, Generic[T, CreateT, UpdateT]):  # Keep Generic for clarity
     """Abstract base service with common CRUD operations.
 
     Inherit from this class to implement domain-specific services.

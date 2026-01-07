@@ -10,7 +10,7 @@ reviewers:
 
 # Technical Design Document (TDD)
 
-> **Purpose**  
+> **Purpose**
 > Single source of truth for the technical approach, risks, and testing strategy for this project/feature.
 
 ---
