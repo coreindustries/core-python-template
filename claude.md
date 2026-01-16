@@ -316,6 +316,76 @@ docker-compose up -d  # Includes Prometheus, Grafana, Loki, Jaeger
 
 Observability config in `observability/` directory - see `observability/README.md` for details.
 
+## AI Agent Coding Standards
+
+This project is optimized for AI-assisted development with Claude Code and other coding agents. The template includes codex-max prompting patterns adapted for Python/FastAPI development.
+
+### Key Agent Instructions
+
+**Autonomy and Persistence:**
+- Bias to action: implement with reasonable assumptions rather than requesting clarification
+- Persist until task is complete: don't stop at plans or partial fixes
+- Carry changes through implementation, verification, and testing
+
+**Code Quality:**
+- Correctness over speed: no risky shortcuts or speculative changes
+- Comprehensiveness: ensure changes work across all relevant surfaces (API → Service → DB)
+- Tight error handling: no broad try/catch or silent failures
+- DRY principle: search for existing implementations before creating new ones
+
+**Efficient Workflows:**
+- Think first, batch everything: plan all file reads, then execute in parallel
+- Use `apply_patch` for single-file edits (agents trained on this format)
+- Run quality checks frequently (every 15-30 minutes during development)
+- Test alongside implementation, not as an afterthought
+
+**See Full Documentation:**
+- **`AGENTS.md`** - Detailed agent instructions (auto-injected into agent conversations)
+- **`prd/04_AI_Agent_Development_Standards.md`** - Complete agent standards PRD
+- **`.claude/skills/`** - Custom slash commands (e.g., `/new-feature`, `/refactor`, `/test`)
+- **`.claude/agents/`** - Custom agent definitions
+
+### Agent-Specific Patterns
+
+**Quality Check Loop:**
+```bash
+# Run frequently during development (every 15-30 minutes)
+uv run ruff check --fix src/ tests/      # Lint + auto-fix
+uv run ruff format src/ tests/           # Format
+uv run mypy src/                         # Type check
+uv run pytest tests/unit/test_module.py -v  # Test specific module
+
+# Before every commit (full suite)
+uv run bandit -r src/                    # Security scan
+uv run pytest --cov=src --cov-fail-under=66  # Full tests with coverage
+```
+
+**Exploration Pattern:**
+```python
+# BAD: Sequential reads
+read("api/routes.py")
+read("services/user.py")
+read("models/user.py")
+
+# GOOD: Parallel batch
+read_parallel([
+    "api/routes.py",
+    "services/user.py",
+    "models/user.py"
+])
+```
+
+**Commit Pattern:**
+```
+<type>: <description>
+
+<body (optional)>
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+```
+
 ## Common Gotchas
 
 1. **Always run `uv run prisma generate` after changing schema** - the Python client is generated code
