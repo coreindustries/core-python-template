@@ -23,6 +23,35 @@ Safely refactor code while maintaining functionality and test coverage.
 
 When this skill is invoked:
 
+### Agent Behavior (Codex-Max Pattern)
+
+**Autonomy and Persistence:**
+- Complete the refactoring end-to-end without stopping at analysis
+- Persist through implementation, testing, and verification
+- Don't stop at "here's what I found" - actually fix it
+- Make reasonable decisions about extraction patterns
+
+**Efficient Exploration:**
+- Read all relevant files in parallel:
+  - Target file(s)
+  - Related files that import/use the target
+  - Test files for coverage verification
+  - Similar patterns in codebase for consistency
+- One parallel batch, not sequential reads
+
+**Safety First:**
+- Verify tests exist and pass BEFORE refactoring
+- If tests don't exist, create them FIRST
+- Run tests after each logical refactoring step
+- Ensure behavior preservation (no functional changes)
+
+**Batch Edits:**
+- Group related extractions together
+- Use `apply_patch` for cohesive changes to single files
+- Don't make tiny incremental edits - read enough context and batch
+
+### Implementation Steps
+
 1. **Analyze the target code**:
    - Read the target file(s)
    - Identify code smells: duplication, complexity, outdated patterns
@@ -52,10 +81,24 @@ When this skill is invoked:
    - Preserve or improve docstrings
 
 5. **Verify after refactoring**:
-   - Run tests: `uv run pytest tests/unit/test_<module>.py -v`
-   - Check type hints: `uv run mypy src/`
-   - Verify linting: `uv run ruff check src/`
-   - Ensure 100% test coverage is maintained
+   - Run full quality check suite:
+     ```bash
+     uv run ruff check --fix src/ tests/
+     uv run ruff format src/ tests/
+     uv run mypy src/
+     uv run pytest tests/unit/test_<module>.py -v
+     uv run pytest --cov=src --cov-fail-under=66
+     ```
+   - Ensure ALL tests pass (not just affected module)
+   - Verify coverage maintained or improved
+   - Check that behavior is preserved (no functional changes)
+
+6. **Present results**:
+   - Lead with what was refactored and why
+   - Show before/after comparison for key changes
+   - Reference specific file locations with line numbers
+   - Confirm all tests pass and coverage maintained
+   - Suggest commit message if ready to commit
 
 ## Refactoring Patterns
 

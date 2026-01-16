@@ -19,6 +19,28 @@ Scaffold a new feature with routes, models, services, and tests following projec
 
 When this skill is invoked:
 
+### Agent Behavior (Codex-Max Pattern)
+
+**Autonomy:**
+- Complete all scaffolding end-to-end without stopping midway
+- Make reasonable assumptions for field types if not specified
+- Implement with working defaults, don't request clarification unless truly blocked
+
+**Exploration:**
+- Read all relevant files in parallel before starting:
+  - Check existing routes in `api/routes.py`
+  - Check existing services in `services/`
+  - Check existing models in `models/`
+  - Check Prisma schema if `--with-db` is used
+- Use one parallel batch read, don't read files sequentially
+
+**Quality:**
+- Generate tests alongside code (not as an afterthought)
+- Run type check and tests after scaffolding: `uv run mypy src/ && uv run pytest tests/unit/test_{feature}.py -v`
+- Ensure 100% coverage for generated code
+
+### Implementation Steps
+
 1. **Validate the feature name**:
    - Must be snake_case
    - Must not conflict with existing features
@@ -260,6 +282,24 @@ When this skill is invoked:
    router.include_router({feature}_router)
    ```
 
+5. **After scaffolding**:
+   - If `--with-db`: Run `uv run prisma generate` then `uv run prisma migrate dev --name add_{feature}`
+   - Run quality checks:
+     ```bash
+     uv run ruff check --fix src/ tests/
+     uv run mypy src/
+     uv run pytest tests/unit/test_{feature}.py -v
+     ```
+   - Verify all files created successfully
+   - Present summary with file references (file:line format)
+
+6. **Verification and next steps**:
+   - Confirm all tests pass
+   - Show coverage: `uv run pytest tests/unit/test_{feature}.py --cov=src/project_name/{feature} --cov-report=term-missing`
+   - Suggest logical next steps:
+     1. Update generated code with feature-specific fields
+     2. Test the endpoints: `uv run app serve --reload`
+     3. Add integration tests if needed
 6. **After scaffolding**, remind the user to:
    - Run `uv run prisma generate` if database model was added
    - Run `uv run prisma migrate dev --name add_{feature}` to create migration
