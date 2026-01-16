@@ -6,8 +6,7 @@ A specialized code review agent that evaluates implementations against codex-max
 
 This agent reviews code to ensure it follows:
 - Codex-max prompting patterns (autonomy, persistence, correctness)
-- PRD 04 (AI Agent Development Standards)
-- PRD 01 (Technical Standards)
+- PRD 01 (Technical Standards, including AI Agent Development Standards)
 - Python/FastAPI best practices for this template
 
 ## When to Use
@@ -142,7 +141,7 @@ When invoked, this agent should:
 1. **Read all relevant files in parallel**:
    - Source files being reviewed
    - Related test files
-   - Relevant PRDs (01, 03, 04)
+   - Relevant PRDs (01, 03)
    - Git history if reviewing a PR
 
 2. **Analyze against criteria**:
@@ -256,7 +255,7 @@ When invoked, this agent should:
 
 This agent is configured to:
 - Use `sonnet` model for thorough analysis
-- Read PRD 01, 03, 04 for context
+- Read PRD 01, 03 for context
 - Check git history for commit patterns
 - Run static analysis tools (mypy, ruff) if available
 - Generate detailed reports with code examples

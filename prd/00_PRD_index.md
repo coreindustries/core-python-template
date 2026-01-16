@@ -2,16 +2,12 @@
 
 ## Core Infrastructure
 
-- [x] 01_Technical_standards.md - Python technical standards and best practices
+- [x] 01_Technical_standards.md - Python technical standards, best practices, and AI agent development patterns
 - [x] 02_Tech_stack.md - Python technology stack (FastAPI, Typer, Prisma, PostgreSQL)
 
 ## Security
 
 - [x] 03_Security.md - Security scanning and code review system
-
-## AI Agent Development
-
-- [x] 04_AI_Agent_Development_Standards.md - Standards for AI-assisted development with codex-max patterns
 
 ## Observability
 
@@ -46,10 +42,9 @@ For long-running features that span multiple sessions, create task files to trac
 - None currently (this is a template)
 
 **Completed Features:**
-- 01_Technical_standards - Implementation complete
+- 01_Technical_standards - Implementation complete (includes AI agent development standards)
 - 02_Tech_stack - Implementation complete
 - 03_Security - Implementation complete
-- 04_AI_Agent_Development_Standards - Implementation complete
 
 **How to Use:**
 1. Create task file when feature will span >1 session: `prd/tasks/{feature}_tasks.md`
@@ -67,9 +62,8 @@ For long-running features that span multiple sessions, create task files to trac
 ## Implementation Order
 
 1. **Phase 1: Foundation (Complete)**
-   - Technical standards → Tech stack
+   - Technical standards (including AI agent patterns) → Tech stack
    - Security scanning system
-   - AI agent development standards
 
 2. **Phase 2: Core Features**
    - [Add future PRDs as they're created]

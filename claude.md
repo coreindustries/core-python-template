@@ -367,7 +367,7 @@ This project is optimized for AI-assisted development with Claude Code and other
 
 **See Full Documentation:**
 - **`AGENTS.md`** - Detailed agent instructions (auto-injected into agent conversations)
-- **`prd/04_AI_Agent_Development_Standards.md`** - Complete agent standards PRD
+- **`prd/01_Technical_standards.md`** - Complete technical and agent standards PRD
 - **`.claude/skills/`** - Custom slash commands (e.g., `/new-feature`, `/refactor`, `/test`)
 - **`.claude/agents/`** - Custom agent definitions
 

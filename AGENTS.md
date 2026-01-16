@@ -233,10 +233,9 @@ All checks MUST pass before committing.
 
 ### Required Reading
 Before implementing features:
-1. **PRD 01 (Technical Standards)**: Code quality requirements (DRY, typing, naming)
+1. **PRD 01 (Technical Standards)**: Code quality, typing, naming, and AI agent development patterns
 2. **PRD 02 (Tech Stack)**: Technology decisions and justifications
 3. **PRD 03 (Security)**: Security requirements and OWASP Top 10 compliance
-4. **PRD 04 (AI Agent Standards)**: AI agent development patterns
 
 ### Implementation Workflow
 1. Read relevant PRDs first
