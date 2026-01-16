@@ -107,10 +107,9 @@ result.metadata  # Already a dict
 
 | Document | Purpose |
 |----------|---------|
-| `prd/01_Technical_standards.md` | Code quality, typing, naming |
+| `prd/01_Technical_standards.md` | Code quality, typing, naming, AI agent patterns |
 | `prd/02_Tech_stack.md` | Technology decisions |
 | `prd/03_Security.md` | OWASP, secrets, audit logging |
-| `prd/04_AI_Agent_Development_Standards.md` | Agent patterns (detailed) |
 | `AGENTS.md` | Agent quick reference |
 | `.claude/skills/` | Slash commands |
 

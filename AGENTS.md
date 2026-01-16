@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Quick reference for AI agents. **Full details: `prd/04_AI_Agent_Development_Standards.md`**
+Quick reference for AI agents. **Full details: `prd/01_Technical_standards.md`**
 
 ## Core Principles
 
@@ -97,7 +97,6 @@ For long-running features:
 
 ## Deep Reference
 
-- **Full agent standards:** `prd/04_AI_Agent_Development_Standards.md`
+- **Full standards:** `prd/01_Technical_standards.md`
 - **Task template:** `prd/tasks/TASK_TEMPLATE.md`
-- **Code standards:** `prd/01_Technical_standards.md`
 - **Security:** `prd/03_Security.md`
