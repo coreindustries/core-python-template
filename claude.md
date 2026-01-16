@@ -192,11 +192,37 @@ All features should reference PRDs in `prd/` directory:
 - **`prd/03_Security.md`** - Security requirements (OWASP Top 10, secrets, audit logging)
 - **`prd/PRD_TEMPLATE.md`** - Template for new feature PRDs
 
-When implementing features:
+### PRD Branching Workflow
+
+Each PRD is developed on its own dedicated branch for isolated development and focused code reviews:
+
+```
+main ──────────────────────────────────────────────────────────►
+       │                                    ▲
+       │ create prd branch                  │ merge PR
+       ▼                                    │
+prd/04-user-authentication ────────────────►│
+       │                              ▲     │
+       │ create feature branch        │     │
+       ▼                              │     │
+feat/user_profile ───────────────────►│     │
+```
+
+**Branch naming conventions:**
+- PRD branches: `prd/{number}-{title-kebab-case}` (e.g., `prd/04-user-authentication`)
+- Feature branches: `feat/{feature_name}` (e.g., `feat/user_profile`)
+
+**Workflow steps:**
+1. Create a PRD branch: `/new-prd 04 "User Authentication"`
+2. Develop features on the PRD branch: `/new-feature user_profile --prd 04`
+3. Features target their parent PRD branch for PRs
+4. PRD branch merges to `main` when complete
+
+### When implementing features:
 1. Read relevant PRDs first
 2. Follow patterns in PRD 01 (Technical Standards)
 3. Use security patterns from PRD 03
-4. Create new PRD for significant features
+4. Create new PRD for significant features using `/new-prd`
 
 ## Prisma ORM Patterns
 
